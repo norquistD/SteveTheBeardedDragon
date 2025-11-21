@@ -1,0 +1,17 @@
+.info-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+}
+
+.info-page h1 {
+    color: var(--dark-green);
+    font-size: 2.5em;
+}
+
+.info-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}

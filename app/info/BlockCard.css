@@ -1,0 +1,19 @@
+
+.block {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--cream);
+    padding: 10px;
+    border-radius: 5px;
+    gap: 10px
+}
+
+.block div {
+    flex: 1;
+}
+
+.info-image {
+    max-width: 40vw;
+    height: auto;
+    border-radius: 5px;
+}

@@ -1,0 +1,20 @@
+.dome-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 20vw;
+  height: 20vw;
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+
+.dome-marker-label {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
