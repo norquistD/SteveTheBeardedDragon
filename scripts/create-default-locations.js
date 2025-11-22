@@ -60,12 +60,15 @@ async function createDefaultLocations() {
       }
 
       const routeId = parseInt(parts[0]);
-      const section = parts[1]; // ignored
+      const section = parts[1];
       const positionX = parseFloat(parts[2]);
       const positionY = parseFloat(parts[3]);
       const locationName = parts[4];
+      const imageUrl = parts[5];
       // Everything after the 5th column is content (may contain commas)
-      const content = parts.slice(5).join(",").trim();
+      let content = parts.slice(6).join(",").trim();
+
+      content = content.replace(/,+$/, "").replaceAll('"', "");
 
       // Validate data
       if (
@@ -93,6 +96,7 @@ async function createDefaultLocations() {
             location_name: locationName,
             position_x: positionX,
             position_y: positionY,
+            location_label: section,
           }),
         });
 
@@ -117,7 +121,7 @@ async function createDefaultLocations() {
                   leftType: "paragraph",
                   leftContent: content,
                   rightType: "url",
-                  rightContent: "",
+                  rightContent: imageUrl || "",
                 },
               ]
             : [],
