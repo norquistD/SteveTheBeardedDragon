@@ -39,19 +39,6 @@ CREATE TABLE IF NOT EXISTS blocks (
     content_id_right BIGINT REFERENCES contents(content_id) DEFAULT NULL,
     location_id BIGINT REFERENCES locations(location_id) NOT NULL,
     position INTEGER, -- NULL = TITLE, 0-99 = CONTENT BLOCK
-    CONSTRAINT check_position CHECK (
-        (
-            position IS NOT NULL 
-            AND (
-                content_id_left IS NOT NULL 
-                OR content_id_right IS NOT NULL
-            )
-        ) 
-        OR (
-            position IS NULL 
-            AND content_id_left IS NOT NULL 
-            AND content_id_right IS NOT NULL
-        )
-    )
+    
 );
 

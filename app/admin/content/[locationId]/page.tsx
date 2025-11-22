@@ -67,9 +67,7 @@ export default function ContentEditorPage({
         setLocation(locationResult.data);
       }
 
-      // Fetch content using the new GET endpoint
-      if (!languageId) return;
-
+      // Fetch content using the GET endpoint
       const contentResponse = await fetch(
         `/api/locations/${locationId}/content?language_id=${languageId}`
       );
@@ -81,7 +79,24 @@ export default function ContentEditorPage({
         // Set title
         setTitle(fetchedTitle);
 
+        // Clear previous state before setting new data
+        setBlocks([]);
+        setEditingBlocks({});
+
         // Initialize editing state for content blocks
+        // Create temporary block objects for the UI
+        const tempBlocks: Block[] = content.map(
+          (_item: any, index: number) => ({
+            block_id: index, // Use index as temporary ID
+            content_id_left: null,
+            content_id_right: null,
+            location_id: locationId,
+            position: index + 1,
+          })
+        );
+
+        setBlocks(tempBlocks);
+
         const initialEditState: Record<
           number,
           {
@@ -92,135 +107,20 @@ export default function ContentEditorPage({
           }
         > = {};
 
-        // Convert content data to blocks format for editing
-        // We need to fetch the actual block IDs, so we still need the blocks endpoint
-        const blocksResponse = await fetch(
-          `/api/blocks?location_id=${locationId}`
-        );
-        const blocksResult = await blocksResponse.json();
+        // Map content to editing state
+        content.forEach((block: any, index: number) => {
+          initialEditState[index] = {
+            leftContent: block.leftContent,
+            rightContent: block.rightContent,
+            leftIsUrl: block.leftType === "url",
+            rightIsUrl: block.rightType === "url",
+          };
+        });
 
-        if (blocksResult.success) {
-          // Filter out title block and match with content data
-          const contentBlocks = blocksResult.data
-            .filter((b: Block) => b.position !== null)
-            .sort(
-              (a: Block, b: Block) => (a.position || 0) - (b.position || 0)
-            );
-
-          // Store title block separately
-          const titleBlockData = blocksResult.data.find(
-            (b: Block) => b.position === null
-          );
-          if (titleBlockData) {
-            setTitleBlock(titleBlockData);
-          }
-
-          setBlocks(contentBlocks);
-
-          // Map content from the new endpoint to blocks
-          contentBlocks.forEach((block: Block, index: number) => {
-            if (index < content.length) {
-              initialEditState[block.block_id] = {
-                leftContent: content[index].leftContent,
-                rightContent: content[index].rightContent,
-                leftIsUrl: content[index].leftType === "url",
-                rightIsUrl: content[index].rightType === "url",
-              };
-            }
-          });
-
-          setEditingBlocks(initialEditState);
-        }
+        setEditingBlocks(initialEditState);
       }
     } catch (error) {
       console.error("Failed to fetch location data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveTitle = async () => {
-    if (!languageId) {
-      console.error("No language selected");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      let contentId: number;
-
-      // Check if we should update existing title content or create new
-      if (titleBlock?.leftContent) {
-        // Update existing content
-        const contentResponse = await fetch(
-          `/api/contents/${titleBlock.leftContent.content_id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              content: title,
-              is_url: false,
-              language_id: Number(languageId),
-            }),
-          }
-        );
-
-        const contentResult = await contentResponse.json();
-        if (!contentResult.success) {
-          console.error("Failed to update title content");
-          return;
-        }
-        contentId = titleBlock.leftContent.content_id;
-      } else {
-        // Create new content
-        const contentResponse = await fetch("/api/contents", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: title,
-            is_url: false,
-            language_id: Number(languageId),
-          }),
-        });
-
-        const contentResult = await contentResponse.json();
-        if (!contentResult.success) {
-          console.error("Failed to create title content");
-          return;
-        }
-        contentId = Number(contentResult.data.content_id);
-      }
-
-      // Update or create title block
-      if (titleBlock) {
-        // Update existing title block
-        await fetch(`/api/blocks/${titleBlock.block_id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content_id_left: Number(contentId),
-            content_id_right: null,
-            location_id: locationId,
-            position: null,
-          }),
-        });
-      } else {
-        // Create new title block
-        await fetch("/api/blocks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content_id_left: Number(contentId),
-            content_id_right: null,
-            location_id: locationId,
-            position: null,
-          }),
-        });
-      }
-
-      fetchLocationData();
-    } catch (error) {
-      console.error("Failed to save title:", error);
     } finally {
       setLoading(false);
     }
@@ -276,105 +176,35 @@ export default function ContentEditorPage({
     }
   };
 
-  const handleAddBlock = async () => {
-    if (!languageId) {
-      console.error("No language selected");
-      return;
-    }
+  const handleAddBlock = () => {
+    // Add a new block to local state
+    const newBlockId = blocks.length;
+    const newBlock: Block = {
+      block_id: newBlockId,
+      content_id_left: null,
+      content_id_right: null,
+      location_id: locationId,
+      position: newBlockId + 1,
+    };
 
-    setLoading(true);
-    try {
-      // Create empty content items
-      const leftContentResponse = await fetch("/api/contents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: "",
-          is_url: false,
-          language_id: Number(languageId),
-        }),
-      });
-
-      const rightContentResponse = await fetch("/api/contents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: "",
-          is_url: false,
-          language_id: Number(languageId),
-        }),
-      });
-
-      const leftResult = await leftContentResponse.json();
-      const rightResult = await rightContentResponse.json();
-
-      if (leftResult.success && rightResult.success) {
-        // Create block with next position
-        const nextPosition =
-          blocks.length > 0
-            ? Math.max(...blocks.map((b) => b.position || 0)) + 1
-            : 1;
-
-        await fetch("/api/blocks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content_id_left: Number(leftResult.data.content_id),
-            content_id_right: Number(rightResult.data.content_id),
-            location_id: locationId,
-            position: nextPosition,
-          }),
-        });
-
-        fetchLocationData();
-      }
-    } catch (error) {
-      console.error("Failed to add block:", error);
-    } finally {
-      setLoading(false);
-    }
+    setBlocks([...blocks, newBlock]);
+    setEditingBlocks({
+      ...editingBlocks,
+      [newBlockId]: {
+        leftContent: "",
+        rightContent: "",
+        leftIsUrl: false,
+        rightIsUrl: false,
+      },
+    });
   };
 
-  const handleUpdateContent = async (
-    contentId: number,
-    newContent: string,
-    isUrl: boolean
-  ) => {
-    if (!languageId) {
-      console.error("No language selected");
-      return;
-    }
-
-    try {
-      await fetch(`/api/contents/${contentId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: newContent,
-          is_url: isUrl,
-          language_id: Number(languageId),
-        }),
-      });
-
-      fetchLocationData();
-    } catch (error) {
-      console.error("Failed to update content:", error);
-    }
-  };
-
-  const handleDeleteBlock = async (blockId: number) => {
-    setLoading(true);
-    try {
-      await fetch(`/api/blocks/${blockId}`, {
-        method: "DELETE",
-      });
-
-      fetchLocationData();
-    } catch (error) {
-      console.error("Failed to delete block:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleDeleteBlock = (blockId: number) => {
+    // Remove block from local state
+    setBlocks(blocks.filter((b) => b.block_id !== blockId));
+    const newEditingBlocks = { ...editingBlocks };
+    delete newEditingBlocks[blockId];
+    setEditingBlocks(newEditingBlocks);
   };
 
   if (!location) {

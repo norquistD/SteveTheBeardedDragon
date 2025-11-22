@@ -66,10 +66,10 @@ export async function GET(
         c2.is_url as right_is_url
       FROM blocks b
       LEFT JOIN contents c1 ON b.content_id_left = c1.content_id 
-        AND (c1.is_url = true OR c1.language_id = ${languageId})
       LEFT JOIN contents c2 ON b.content_id_right = c2.content_id
-        AND (c2.is_url = true OR c2.language_id = ${languageId})
       WHERE b.location_id = ${locationId}
+      AND (c1.language_id = ${languageId})
+      AND (c2.language_id = ${languageId})
       ORDER BY b.position NULLS FIRST
     `) as BlockRow[];
 
@@ -180,18 +180,26 @@ export async function POST(
       DELETE FROM blocks WHERE location_id = ${locationId}
     `;
 
-    // Create title content
-    const titleContentResult = await sql`
+    // Create title content (left)
+    const titleContentLeftResult = await sql`
       INSERT INTO contents (content, is_url, language_id)
       VALUES (${title}, false, ${languageId})
       RETURNING content_id
     `;
-    const titleContentId = titleContentResult[0].content_id;
+    const titleContentLeftId = titleContentLeftResult[0].content_id;
+
+    // Create dummy title content (right) to satisfy constraint
+    const titleContentRightResult = await sql`
+      INSERT INTO contents (content, is_url, language_id)
+      VALUES ('', false, ${languageId})
+      RETURNING content_id
+    `;
+    const titleContentRightId = titleContentRightResult[0].content_id;
 
     // Create title block (position IS NULL)
     await sql`
       INSERT INTO blocks (content_id_left, content_id_right, location_id, position)
-      VALUES (${titleContentId}, NULL, ${locationId}, NULL)
+      VALUES (${titleContentLeftId}, ${titleContentRightId}, ${locationId}, NULL)
     `;
 
     // Create content blocks
@@ -285,49 +293,60 @@ export async function PUT(
       );
     }
 
-    // Get existing blocks for this location
+    // Get existing blocks for this location AND language
+    // A block belongs to a language if its content belongs to that language
     const existingBlocks = await sql`
-      SELECT block_id, content_id_left, content_id_right, position
-      FROM blocks 
-      WHERE location_id = ${locationId}
-      ORDER BY position NULLS FIRST
+      SELECT b.block_id, b.content_id_left, b.content_id_right, b.position
+      FROM blocks b
+      LEFT JOIN contents c1 ON b.content_id_left = c1.content_id
+      LEFT JOIN contents c2 ON b.content_id_right = c2.content_id
+      WHERE b.location_id = ${locationId}
+      AND (c1.language_id = ${languageId} OR c2.language_id = ${languageId})
+      ORDER BY b.position NULLS FIRST
     `;
+
+    console.log(
+      `[PUT] Found ${existingBlocks.length} existing blocks for location ${locationId}, language ${languageId}`
+    );
 
     // Handle title block (position = NULL)
     const titleBlock = existingBlocks.find((b) => b.position === null);
 
     if (titleBlock) {
-      // Update existing title content
-      if (titleBlock.content_id_left) {
-        await sql`
-          UPDATE contents
-          SET content = ${title}, is_url = false, language_id = ${languageId}
-          WHERE content_id = ${titleBlock.content_id_left}
-        `;
-      } else {
-        // Create new title content and update block
-        const titleContentResult = await sql`
-          INSERT INTO contents (content, is_url, language_id)
-          VALUES (${title}, false, ${languageId})
-          RETURNING content_id
-        `;
-        await sql`
-          UPDATE blocks
-          SET content_id_left = ${titleContentResult[0].content_id}
-          WHERE block_id = ${titleBlock.block_id}
-        `;
-      }
+      // Update existing title content for this language
+      console.log(
+        `[PUT] Updating existing title block ${titleBlock.block_id}, content ${titleBlock.content_id_left}`
+      );
+      await sql`
+        UPDATE contents
+        SET content = ${title}
+        WHERE content_id = ${titleBlock.content_id_left}
+        AND language_id = ${languageId}
+      `;
     } else {
-      // Create new title content and block
-      const titleContentResult = await sql`
+      // Create new title content and block for this language
+      console.log(`[PUT] Creating new title block for language ${languageId}`);
+      const titleContentLeftResult = await sql`
         INSERT INTO contents (content, is_url, language_id)
         VALUES (${title}, false, ${languageId})
         RETURNING content_id
       `;
+
+      // Create a dummy right content to satisfy the database constraint
+      // (title blocks require both left and right content_id to be NOT NULL)
+      const titleContentRightResult = await sql`
+        INSERT INTO contents (content, is_url, language_id)
+        VALUES ('', false, ${languageId})
+        RETURNING content_id
+      `;
+
       await sql`
         INSERT INTO blocks (content_id_left, content_id_right, location_id, position)
-        VALUES (${titleContentResult[0].content_id}, NULL, ${locationId}, NULL)
+        VALUES (${titleContentLeftResult[0].content_id}, ${titleContentRightResult[0].content_id}, ${locationId}, NULL)
       `;
+      console.log(
+        `[PUT] Created new title block with content_id_left=${titleContentLeftResult[0].content_id}`
+      );
     }
 
     // Handle content blocks
@@ -339,48 +358,46 @@ export async function PUT(
       const existingBlock = contentBlocks[i];
 
       if (existingBlock) {
-        // Update existing block's content
-        if (existingBlock.content_id_left) {
+        // Check if this block's content belongs to the current language
+        const leftContentCheck = await sql`
+          SELECT content_id FROM contents WHERE content_id = ${existingBlock.content_id_left} AND language_id = ${languageId}
+        `;
+        const rightContentCheck = await sql`
+          SELECT content_id FROM contents WHERE content_id = ${existingBlock.content_id_right} AND language_id = ${languageId}
+        `;
+
+        if (leftContentCheck.length > 0 && rightContentCheck.length > 0) {
+          // Update existing content for this language
           await sql`
             UPDATE contents
-            SET content = ${block.leftContent}, is_url = ${block.leftType === "url"}, language_id = ${languageId}
+            SET content = ${block.leftContent}, is_url = ${block.leftType === "url"}
             WHERE content_id = ${existingBlock.content_id_left}
           `;
+
+          await sql`
+            UPDATE contents
+            SET content = ${block.rightContent}, is_url = ${block.rightType === "url"}
+            WHERE content_id = ${existingBlock.content_id_right}
+          `;
         } else {
-          // Create new left content
+          // Content for this language doesn't exist, create new block
           const leftContentResult = await sql`
             INSERT INTO contents (content, is_url, language_id)
             VALUES (${block.leftContent}, ${block.leftType === "url"}, ${languageId})
             RETURNING content_id
           `;
-          await sql`
-            UPDATE blocks
-            SET content_id_left = ${leftContentResult[0].content_id}
-            WHERE block_id = ${existingBlock.block_id}
-          `;
-        }
-
-        if (existingBlock.content_id_right) {
-          await sql`
-            UPDATE contents
-            SET content = ${block.rightContent}, is_url = ${block.rightType === "url"}, language_id = ${languageId}
-            WHERE content_id = ${existingBlock.content_id_right}
-          `;
-        } else {
-          // Create new right content
           const rightContentResult = await sql`
             INSERT INTO contents (content, is_url, language_id)
             VALUES (${block.rightContent}, ${block.rightType === "url"}, ${languageId})
             RETURNING content_id
           `;
           await sql`
-            UPDATE blocks
-            SET content_id_right = ${rightContentResult[0].content_id}
-            WHERE block_id = ${existingBlock.block_id}
+            INSERT INTO blocks (content_id_left, content_id_right, location_id, position)
+            VALUES (${leftContentResult[0].content_id}, ${rightContentResult[0].content_id}, ${locationId}, ${i + 1})
           `;
         }
       } else {
-        // Create new block with new content
+        // Create new block with new content for this language
         const leftContentResult = await sql`
           INSERT INTO contents (content, is_url, language_id)
           VALUES (${block.leftContent}, ${block.leftType === "url"}, ${languageId})
@@ -398,14 +415,28 @@ export async function PUT(
       }
     }
 
-    // Delete extra blocks if content array is shorter than existing blocks
+    // Delete extra blocks for this language if content array is shorter than existing blocks
     if (content.length < contentBlocks.length) {
       for (let i = content.length; i < contentBlocks.length; i++) {
         const blockToDelete = contentBlocks[i];
-        await sql`
-          DELETE FROM blocks WHERE block_id = ${blockToDelete.block_id}
+        // Only delete if this block is for the current language
+        const blockContents = await sql`
+          SELECT c1.language_id as left_lang, c2.language_id as right_lang
+          FROM blocks b
+          LEFT JOIN contents c1 ON b.content_id_left = c1.content_id
+          LEFT JOIN contents c2 ON b.content_id_right = c2.content_id
+          WHERE b.block_id = ${blockToDelete.block_id}
         `;
-        // Note: Content entries will remain for potential reuse or can be cleaned up separately
+
+        if (
+          blockContents.length > 0 &&
+          (blockContents[0].left_lang === languageId ||
+            blockContents[0].right_lang === languageId)
+        ) {
+          await sql`
+            DELETE FROM blocks WHERE block_id = ${blockToDelete.block_id}
+          `;
+        }
       }
     }
 
