@@ -1,13 +1,19 @@
 CREATE TABLE IF NOT EXISTS domes (
     dome_id BIGSERIAL PRIMARY KEY,
     dome_name VARCHAR(255) NOT NULL,
-    dome_image_url TEXT NOT NULL,
-    dome_path_image_url TEXT NOT NULL
+    dome_image_url TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tours (
+    tour_id BIGSERIAL PRIMARY KEY,
+    tour_name VARCHAR(255) NOT NULL,
+    tour_description TEXT NOT NULL,
+    tour_path_image_url TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS locations (
     location_id BIGSERIAL PRIMARY KEY,
-    dome_id BIGINT REFERENCES domes(dome_id) NOT NULL,
+    tour_id BIGINT REFERENCES tours(tour_id) NOT NULL,
     location_name VARCHAR(255) NOT NULL
 );
 

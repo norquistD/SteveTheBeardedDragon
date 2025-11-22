@@ -17,7 +17,7 @@ export async function GET(
     }
 
     const result = await sql`
-      SELECT location_id, dome_id, location_name 
+      SELECT location_id, tour_id, location_name 
       FROM locations 
       WHERE location_id = ${id}
     ` as Location[];
@@ -67,15 +67,15 @@ export async function PUT(
       );
     }
 
-    const { dome_id, location_name } = validationResult.data;
+    const { tour_id, location_name } = validationResult.data;
 
-    // Validate dome_id if provided
-    if (dome_id !== undefined) {
-      const domeCheck =
-        await sql`SELECT dome_id FROM domes WHERE dome_id = ${dome_id}`;
-      if (domeCheck.length === 0) {
+    // Validate tour_id if provided
+    if (tour_id !== undefined) {
+      const tourCheck =
+        await sql`SELECT tour_id FROM tours WHERE tour_id = ${tour_id}`;
+      if (tourCheck.length === 0) {
         return NextResponse.json(
-          { success: false, error: "Dome not found" } as ApiError,
+          { success: false, error: "Tour not found" } as ApiError,
           { status: 404 },
         );
       }
@@ -88,8 +88,8 @@ export async function PUT(
 
     const updates: string[] = [];
 
-    if (dome_id !== undefined) {
-      updates.push(`dome_id = ${dome_id}`);
+    if (tour_id !== undefined) {
+      updates.push(`tour_id = ${tour_id}`);
     }
     if (location_name !== undefined) {
       updates.push(`location_name = ${escapeSqlString(location_name)}`);
@@ -106,7 +106,7 @@ export async function PUT(
       UPDATE locations 
       SET ${updates.join(", ")}
       WHERE location_id = ${id}
-      RETURNING location_id, dome_id, location_name
+      RETURNING location_id, tour_id, location_name
     `;
     
     const result = (await sql(query)) as Location[];

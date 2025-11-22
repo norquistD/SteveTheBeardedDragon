@@ -6,26 +6,26 @@ import { createLocationSchema } from "@/lib/schemas";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const domeId = searchParams.get("dome_id");
+    const tourId = searchParams.get("tour_id");
 
     let locations: Location[];
-    if (domeId) {
-      const domeIdNum = parseInt(domeId);
-      if (isNaN(domeIdNum)) {
+    if (tourId) {
+      const tourIdNum = parseInt(tourId);
+      if (isNaN(tourIdNum)) {
         return NextResponse.json(
-          { success: false, error: "Invalid dome_id" } as ApiError,
+          { success: false, error: "Invalid tour_id" } as ApiError,
           { status: 400 },
         );
       }
       locations = await sql`
-        SELECT location_id, dome_id, location_name 
+        SELECT location_id, tour_id, location_name 
         FROM locations 
-        WHERE dome_id = ${domeIdNum} 
+        WHERE tour_id = ${tourIdNum} 
         ORDER BY location_id
       ` as Location[];
     } else {
       locations = await sql`
-        SELECT location_id, dome_id, location_name 
+        SELECT location_id, tour_id, location_name 
         FROM locations 
         ORDER BY location_id
       ` as Location[];
@@ -57,22 +57,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { dome_id, location_name } = validationResult.data;
+    const { tour_id, location_name } = validationResult.data;
 
-    // Validate dome_id exists
-    const domeCheck =
-      await sql`SELECT dome_id FROM domes WHERE dome_id = ${dome_id}`;
-    if (domeCheck.length === 0) {
+    // Validate tour_id exists
+    const tourCheck =
+      await sql`SELECT tour_id FROM tours WHERE tour_id = ${tour_id}`;
+    if (tourCheck.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Dome not found" } as ApiError,
+        { success: false, error: "Tour not found" } as ApiError,
         { status: 404 },
       );
     }
 
     const result = await sql`
-      INSERT INTO locations (dome_id, location_name)
-      VALUES (${dome_id}, ${location_name})
-      RETURNING location_id, dome_id, location_name
+      INSERT INTO locations (tour_id, location_name)
+      VALUES (${tour_id}, ${location_name})
+      RETURNING location_id, tour_id, location_name
     ` as Location[];
 
     return NextResponse.json(

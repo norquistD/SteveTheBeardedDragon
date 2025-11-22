@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { Dome, ApiResponse, ApiError } from "@/lib/types";
-import { updateDomeSchema } from "@/lib/schemas";
+import { Tour, Location, ApiResponse, ApiError } from "@/lib/types";
+import { updateTourSchema } from "@/lib/schemas";
 
 export async function GET(
   request: NextRequest,
@@ -17,14 +17,14 @@ export async function GET(
     }
 
     const result = await sql`
-      SELECT dome_id, dome_name, dome_image_url 
-      FROM domes 
-      WHERE dome_id = ${id}
-    ` as Dome[];
+      SELECT tour_id, tour_name, tour_description, tour_path_image_url 
+      FROM tours 
+      WHERE tour_id = ${id}
+    ` as Tour[];
 
     if (result.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Dome not found" } as ApiError,
+        { success: false, error: "Tour not found" } as ApiError,
         { status: 404 },
       );
     }
@@ -32,10 +32,10 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: result[0],
-    } as ApiResponse<Dome>);
+    } as ApiResponse<Tour>);
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: "Failed to fetch dome" } as ApiError,
+      { success: false, error: "Failed to fetch tour" } as ApiError,
       { status: 500 },
     );
   }
@@ -55,7 +55,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const validationResult = updateDomeSchema.safeParse(body);
+    const validationResult = updateTourSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -67,7 +67,8 @@ export async function PUT(
       );
     }
 
-    const { dome_name, dome_image_url } = validationResult.data;
+    const { tour_name, tour_description, tour_path_image_url } =
+      validationResult.data;
 
     // Helper function to escape SQL strings
     const escapeSqlString = (value: string): string => {
@@ -76,11 +77,14 @@ export async function PUT(
 
     const updates: string[] = [];
 
-    if (dome_name !== undefined) {
-      updates.push(`dome_name = ${escapeSqlString(dome_name)}`);
+    if (tour_name !== undefined) {
+      updates.push(`tour_name = ${escapeSqlString(tour_name)}`);
     }
-    if (dome_image_url !== undefined) {
-      updates.push(`dome_image_url = ${escapeSqlString(dome_image_url)}`);
+    if (tour_description !== undefined) {
+      updates.push(`tour_description = ${escapeSqlString(tour_description)}`);
+    }
+    if (tour_path_image_url !== undefined) {
+      updates.push(`tour_path_image_url = ${escapeSqlString(tour_path_image_url)}`);
     }
 
     if (updates.length === 0) {
@@ -91,17 +95,17 @@ export async function PUT(
     }
 
     const query = `
-      UPDATE domes 
+      UPDATE tours 
       SET ${updates.join(", ")}
-      WHERE dome_id = ${id}
-      RETURNING dome_id, dome_name, dome_image_url
+      WHERE tour_id = ${id}
+      RETURNING tour_id, tour_name, tour_description, tour_path_image_url
     `;
     
-    const result = (await sql(query)) as Dome[];
+    const result = (await sql(query)) as Tour[];
 
     if (result.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Dome not found" } as ApiError,
+        { success: false, error: "Tour not found" } as ApiError,
         { status: 404 },
       );
     }
@@ -109,10 +113,10 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       data: result[0],
-    } as ApiResponse<Dome>);
+    } as ApiResponse<Tour>);
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: "Failed to update dome" } as ApiError,
+      { success: false, error: "Failed to update tour" } as ApiError,
       { status: 500 },
     );
   }
@@ -131,24 +135,38 @@ export async function DELETE(
       );
     }
 
+    // Check for existing locations
+    const locations =
+      await sql`SELECT location_id FROM locations WHERE tour_id = ${id}` as Location[];
+    if (locations.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Cannot delete tour with existing locations",
+        } as ApiError,
+        { status: 409 },
+      );
+    }
+
     const result =
-      await sql`DELETE FROM domes WHERE dome_id = ${id} RETURNING dome_id`;
+      await sql`DELETE FROM tours WHERE tour_id = ${id} RETURNING tour_id`;
 
     if (result.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Dome not found" } as ApiError,
+        { success: false, error: "Tour not found" } as ApiError,
         { status: 404 },
       );
     }
 
     return NextResponse.json({
       success: true,
-      data: { id: result[0].dome_id },
+      data: { id: result[0].tour_id },
     } as ApiResponse<{ id: number }>);
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: "Failed to delete dome" } as ApiError,
+      { success: false, error: "Failed to delete tour" } as ApiError,
       { status: 500 },
     );
   }
 }
+

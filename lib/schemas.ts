@@ -4,23 +4,34 @@ import { z } from "zod";
 export const createDomeSchema = z.object({
   dome_name: z.string().max(255),
   dome_image_url: z.string(),
-  dome_path_image_url: z.string(),
 });
 
 export const updateDomeSchema = z.object({
   dome_name: z.string().max(255).optional(),
   dome_image_url: z.string().optional(),
-  dome_path_image_url: z.string().optional(),
+});
+
+// Tour Schemas
+export const createTourSchema = z.object({
+  tour_name: z.string().max(255),
+  tour_description: z.string(),
+  tour_path_image_url: z.string(),
+});
+
+export const updateTourSchema = z.object({
+  tour_name: z.string().max(255).optional(),
+  tour_description: z.string().optional(),
+  tour_path_image_url: z.string().optional(),
 });
 
 // Location Schemas
 export const createLocationSchema = z.object({
-  dome_id: z.number().int().positive(),
+  tour_id: z.number().int().positive(),
   location_name: z.string().max(255),
 });
 
 export const updateLocationSchema = z.object({
-  dome_id: z.number().int().positive().optional(),
+  tour_id: z.number().int().positive().optional(),
   location_name: z.string().max(255).optional(),
 });
 

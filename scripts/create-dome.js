@@ -14,7 +14,6 @@ async function runDomeOperations() {
     const domeData = {
       dome_name: 'Test Dome',
       dome_image_url: 'https://example.com/dome-image.jpg',
-      dome_path_image_url: 'https://example.com/dome-path-image.jpg',
     };
 
     console.log('Creating dome with data:', domeData);

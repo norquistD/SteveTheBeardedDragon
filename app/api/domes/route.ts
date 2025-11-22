@@ -6,7 +6,7 @@ import { createDomeSchema } from "@/lib/schemas";
 export async function GET() {
   try {
     const domes = await sql`
-      SELECT dome_id, dome_name, dome_image_url, dome_path_image_url 
+      SELECT dome_id, dome_name, dome_image_url 
       FROM domes 
       ORDER BY dome_id
     ` as Dome[];
@@ -36,13 +36,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { dome_name, dome_image_url, dome_path_image_url } =
-      validationResult.data;
+    const { dome_name, dome_image_url } = validationResult.data;
 
     const result = await sql`
-      INSERT INTO domes (dome_name, dome_image_url, dome_path_image_url)
-      VALUES (${dome_name}, ${dome_image_url}, ${dome_path_image_url})
-      RETURNING dome_id, dome_name, dome_image_url, dome_path_image_url
+      INSERT INTO domes (dome_name, dome_image_url)
+      VALUES (${dome_name}, ${dome_image_url})
+      RETURNING dome_id, dome_name, dome_image_url
     ` as Dome[];
 
     return NextResponse.json(

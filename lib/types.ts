@@ -2,12 +2,18 @@ export interface Dome {
   dome_id: number;
   dome_name: string;
   dome_image_url: string;
-  dome_path_image_url: string;
+}
+
+export interface Tour {
+  tour_id: number;
+  tour_name: string;
+  tour_description: string;
+  tour_path_image_url: string;
 }
 
 export interface Location {
   location_id: number;
-  dome_id: number;
+  tour_id: number;
   location_name: string;
 }
 

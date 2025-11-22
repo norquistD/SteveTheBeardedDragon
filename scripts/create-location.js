@@ -7,42 +7,42 @@ const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 async function runLocationOperations() {
   let locationId;
-  let domeId;
+  let tourId;
 
   try {
-    // 0. Create a dome first (dependency)
-    console.log('\n=== Step 0: Creating dome (dependency) ===');
-    const domeData = {
-      dome_name: 'Test Dome',
-      dome_image_url: 'https://example.com/dome-image.jpg',
-      dome_path_image_url: 'https://example.com/dome-path-image.jpg',
+    // 0. Create a tour first (dependency)
+    console.log('\n=== Step 0: Creating tour (dependency) ===');
+    const tourData = {
+      tour_name: 'Test Tour',
+      tour_description: 'A test tour description',
+      tour_path_image_url: 'https://example.com/tour-path-image.jpg',
     };
 
-    console.log('Creating dome with data:', domeData);
-    const domeCreateResponse = await fetch(`${API_URL}/api/domes`, {
+    console.log('Creating tour with data:', tourData);
+    const tourCreateResponse = await fetch(`${API_URL}/api/tours`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(domeData),
+      body: JSON.stringify(tourData),
     });
 
-    const domeCreateResult = await domeCreateResponse.json();
+    const tourCreateResult = await tourCreateResponse.json();
 
-    if (!domeCreateResult.success) {
-      console.error('✗ Failed to create dome');
-      console.error('Error:', domeCreateResult.error);
+    if (!tourCreateResult.success) {
+      console.error('✗ Failed to create tour');
+      console.error('Error:', tourCreateResult.error);
       process.exit(1);
     }
 
-    console.log('✓ Dome created successfully!');
-    domeId = parseInt(domeCreateResult.data.dome_id);
-    console.log(`Dome ID: ${domeId}`);
+    console.log('✓ Tour created successfully!');
+    tourId = parseInt(tourCreateResult.data.tour_id);
+    console.log(`Tour ID: ${tourId}`);
 
     // 1. Create a location
     console.log('\n=== Step 1: Creating location ===');
     const locationData = {
-      dome_id: domeId,
+      tour_id: tourId,
       location_name: 'Test Location',
     };
 
@@ -128,22 +128,22 @@ async function runLocationOperations() {
     console.log('✓ Location deleted successfully!');
     console.log('Deleted location ID:', deleteResult.data.id);
 
-    // 5. Clean up: Delete the dome
-    console.log('\n=== Step 5: Cleaning up dome ===');
-    console.log(`Deleting dome ${domeId}`);
-    const domeDeleteResponse = await fetch(`${API_URL}/api/domes/${domeId}`, {
+    // 5. Clean up: Delete the tour
+    console.log('\n=== Step 5: Cleaning up tour ===');
+    console.log(`Deleting tour ${tourId}`);
+    const tourDeleteResponse = await fetch(`${API_URL}/api/tours/${tourId}`, {
       method: 'DELETE',
     });
 
-    const domeDeleteResult = await domeDeleteResponse.json();
+    const tourDeleteResult = await tourDeleteResponse.json();
 
-    if (!domeDeleteResult.success) {
-      console.error('✗ Failed to delete dome');
-      console.error('Error:', domeDeleteResult.error);
+    if (!tourDeleteResult.success) {
+      console.error('✗ Failed to delete tour');
+      console.error('Error:', tourDeleteResult.error);
       process.exit(1);
     }
 
-    console.log('✓ Dome deleted successfully!');
+    console.log('✓ Tour deleted successfully!');
 
     console.log('\n=== All operations completed successfully! ===');
   } catch (error) {

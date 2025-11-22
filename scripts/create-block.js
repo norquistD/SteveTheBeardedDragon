@@ -8,47 +8,47 @@ const API_URL = process.env.API_URL || 'http://localhost:3000';
 async function runBlockOperations() {
   let blockId;
   let locationId;
-  let domeId;
+  let tourId;
   let languageId;
   let contentIdLeft;
   let contentIdRight;
 
   try {
-    // 0. Create dependencies: dome, location, language, and contents
+    // 0. Create dependencies: tour, location, language, and contents
     console.log('\n=== Step 0: Creating dependencies ===');
     
-    // Create dome
-    console.log('\n--- Creating dome ---');
-    const domeData = {
-      dome_name: 'Test Dome',
-      dome_image_url: 'https://example.com/dome-image.jpg',
-      dome_path_image_url: 'https://example.com/dome-path-image.jpg',
+    // Create tour
+    console.log('\n--- Creating tour ---');
+    const tourData = {
+      tour_name: 'Test Tour',
+      tour_description: 'A test tour description',
+      tour_path_image_url: 'https://example.com/tour-path-image.jpg',
     };
 
-    const domeCreateResponse = await fetch(`${API_URL}/api/domes`, {
+    const tourCreateResponse = await fetch(`${API_URL}/api/tours`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(domeData),
+      body: JSON.stringify(tourData),
     });
 
-    const domeCreateResult = await domeCreateResponse.json();
+    const tourCreateResult = await tourCreateResponse.json();
 
-    if (!domeCreateResult.success) {
-      console.error('✗ Failed to create dome');
-      console.error('Error:', domeCreateResult.error);
+    if (!tourCreateResult.success) {
+      console.error('✗ Failed to create tour');
+      console.error('Error:', tourCreateResult.error);
       process.exit(1);
     }
 
-    console.log('✓ Dome created successfully!');
-    domeId = parseInt(domeCreateResult.data.dome_id);
-    console.log(`Dome ID: ${domeId}`);
+    console.log('✓ Tour created successfully!');
+    tourId = parseInt(tourCreateResult.data.tour_id);
+    console.log(`Tour ID: ${tourId}`);
 
     // Create location
     console.log('\n--- Creating location ---');
     const locationData = {
-      dome_id: domeId,
+      tour_id: tourId,
       location_name: 'Test Location',
     };
 
@@ -247,7 +247,7 @@ async function runBlockOperations() {
     console.log('✓ Block deleted successfully!');
     console.log('Deleted block ID:', deleteResult.data.id);
 
-    // 5. Clean up: Delete contents, location, dome, and language
+    // 5. Clean up: Delete contents, location, tour, and language
     console.log('\n=== Step 5: Cleaning up dependencies ===');
     
     // Delete right content
@@ -298,21 +298,21 @@ async function runBlockOperations() {
 
     console.log('✓ Location deleted successfully!');
 
-    // Delete dome
-    console.log('\n--- Deleting dome ---');
-    const domeDeleteResponse = await fetch(`${API_URL}/api/domes/${domeId}`, {
+    // Delete tour
+    console.log('\n--- Deleting tour ---');
+    const tourDeleteResponse = await fetch(`${API_URL}/api/tours/${tourId}`, {
       method: 'DELETE',
     });
 
-    const domeDeleteResult = await domeDeleteResponse.json();
+    const tourDeleteResult = await tourDeleteResponse.json();
 
-    if (!domeDeleteResult.success) {
-      console.error('✗ Failed to delete dome');
-      console.error('Error:', domeDeleteResult.error);
+    if (!tourDeleteResult.success) {
+      console.error('✗ Failed to delete tour');
+      console.error('Error:', tourDeleteResult.error);
       process.exit(1);
     }
 
-    console.log('✓ Dome deleted successfully!');
+    console.log('✓ Tour deleted successfully!');
 
     // Delete language
     console.log('\n--- Deleting language ---');
