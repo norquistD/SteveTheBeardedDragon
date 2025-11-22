@@ -1,9 +1,9 @@
 import "./BlockCard.css";
 
 export interface Block {
-  leftType: "paragraph" | "image";
+  leftType: "paragraph" | "url";
   leftContent: string;
-  rightType: "paragraph" | "image";
+  rightType: "paragraph" | "url";
   rightContent: string;
 }
 

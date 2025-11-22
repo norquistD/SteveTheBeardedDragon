@@ -13,19 +13,19 @@ const sampleData: InfoPageData = {
     {
       leftType: "paragraph",
       leftContent: "This is a sample paragraph on the left.",
-      rightType: "image",
+      rightType: "url",
       rightContent: "/bearded.png",
     },
     {
-      leftType: "image",
+      leftType: "url",
       leftContent: "/bearded.png",
       rightType: "paragraph",
       rightContent: "This is a sample paragraph on the right.",
     },
     {
-      leftType: "image",
+      leftType: "url",
       leftContent: "/bearded.png",
-      rightType: "image",
+      rightType: "url",
       rightContent: "/bearded.png",
     },
     {
@@ -39,7 +39,7 @@ const sampleData: InfoPageData = {
 
 export default function InfoPage() {
   const initialData = sampleData;
-  
+
   return (
     <div className="info-page">
       <h1>{initialData.title}</h1>
