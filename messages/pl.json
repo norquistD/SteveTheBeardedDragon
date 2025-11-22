@@ -22,5 +22,8 @@
   "languageSwitcher": {
     "title": "Wybierz język",
     "loading": "Ładowanie języków..."
+  },
+  "info": {
+    "notAvailable": "Przepraszamy za niedogodności, ta treść nie jest jeszcze dostępna w języku {language}."
   }
 }

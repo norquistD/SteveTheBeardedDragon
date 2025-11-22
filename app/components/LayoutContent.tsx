@@ -28,7 +28,11 @@ export default function LayoutContent({
 
           const selectedLang = englishLang || result.data[0];
           setLanguageId(selectedLang.language_id);
-          setLocale(selectedLang.language_code, selectedLang.language_id);
+          setLocale(
+            selectedLang.language_code,
+            selectedLang.language_id,
+            selectedLang.language_native_name
+          );
         }
       } catch (error) {
         console.error("Failed to fetch languages:", error);
@@ -51,7 +55,11 @@ export default function LayoutContent({
 
         if (selectedLang) {
           setLanguageId(newLanguageId);
-          setLocale(selectedLang.language_code, newLanguageId);
+          setLocale(
+            selectedLang.language_code,
+            newLanguageId,
+            selectedLang.language_native_name
+          );
         }
       }
     } catch (error) {

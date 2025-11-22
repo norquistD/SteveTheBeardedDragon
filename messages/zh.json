@@ -22,5 +22,8 @@
   "languageSwitcher": {
     "title": "选择语言",
     "loading": "加载语言中..."
+  },
+  "info": {
+    "notAvailable": "抱歉给您带来不便，此内容暂未提供{language}版本。"
   }
 }

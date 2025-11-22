@@ -6,8 +6,9 @@ import { NextIntlClientProvider } from "next-intl";
 const LocaleContext = createContext<{
   locale: string;
   languageId: number;
-  setLocale: (locale: string, languageId: number) => void;
-}>({ locale: "en", languageId: 4, setLocale: () => {} });
+  languageNativeName: string;
+  setLocale: (locale: string, languageId: number, languageNativeName: string) => void;
+}>({ locale: "en", languageId: 4, languageNativeName: "English", setLocale: () => {} });
 
 export function useLocale() {
   return useContext(LocaleContext);
@@ -20,6 +21,7 @@ export default function IntlProvider({
 }) {
   const [locale, setLocaleState] = useState("en");
   const [languageId, setLanguageId] = useState(4); // Default to English
+  const [languageNativeName, setLanguageNativeName] = useState("English");
   const [messages, setMessages] = useState({});
 
   useEffect(() => {
@@ -40,13 +42,14 @@ export default function IntlProvider({
     }
   };
 
-  const setLocale = (newLocale: string, newLanguageId: number) => {
+  const setLocale = (newLocale: string, newLanguageId: number, newLanguageNativeName: string) => {
     setLocaleState(newLocale);
     setLanguageId(newLanguageId);
+    setLanguageNativeName(newLanguageNativeName);
   };
 
   return (
-    <LocaleContext.Provider value={{ locale, languageId, setLocale }}>
+    <LocaleContext.Provider value={{ locale, languageId, languageNativeName, setLocale }}>
       <NextIntlClientProvider locale={locale} messages={messages}>
         {children}
       </NextIntlClientProvider>

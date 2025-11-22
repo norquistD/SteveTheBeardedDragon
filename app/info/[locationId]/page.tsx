@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
 import { type Block, BlockCard } from "../BlockCard";
 import "../InfoPage.css";
@@ -18,7 +19,8 @@ export default function InfoPage({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { languageId: contextLanguageId } = useLocale();
+  const t = useTranslations("info");
+  const { languageId: contextLanguageId, languageNativeName } = useLocale();
   const languageId = searchParams.get("language_id") || "1";
   const locationId = params.locationId;
 
@@ -77,6 +79,28 @@ export default function InfoPage({
       <div className="info-page">
         <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
           {error || "No content found"}
+        </p>
+      </div>
+    );
+  }
+
+  // Check if content is empty (no title and no content blocks)
+  const hasContent =
+    pageData.title.trim() !== "" || pageData.content.length > 0;
+
+  if (!hasContent) {
+    return (
+      <div className="info-page">
+        <p
+          style={{
+            textAlign: "center",
+            color: "var(--dark-green)",
+            padding: "2rem",
+          }}
+        >
+          {t("notAvailable", {
+            language: languageNativeName || "this language",
+          })}
         </p>
       </div>
     );
