@@ -14,7 +14,9 @@ CREATE TABLE IF NOT EXISTS tours (
 CREATE TABLE IF NOT EXISTS locations (
     location_id BIGSERIAL PRIMARY KEY,
     tour_id BIGINT REFERENCES tours(tour_id) NOT NULL,
-    location_name VARCHAR(255) NOT NULL
+    location_name VARCHAR(255) NOT NULL,
+    position_x FLOAT NOT NULL,
+    position_y FLOAT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS languages (

@@ -15,6 +15,8 @@ export interface Location {
   location_id: number;
   tour_id: number;
   location_name: string;
+  position_x: number;
+  position_y: number;
 }
 
 export interface Language {

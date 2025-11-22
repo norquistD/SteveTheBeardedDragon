@@ -28,11 +28,15 @@ export const updateTourSchema = z.object({
 export const createLocationSchema = z.object({
   tour_id: z.number().int().positive(),
   location_name: z.string().max(255),
+  position_x: z.number().min(0).max(1),
+  position_y: z.number().min(0).max(1),
 });
 
 export const updateLocationSchema = z.object({
   tour_id: z.number().int().positive().optional(),
   location_name: z.string().max(255).optional(),
+  position_x: z.number().min(0).max(1).optional(),
+  position_y: z.number().min(0).max(1).optional(),
 });
 
 // Language Schemas

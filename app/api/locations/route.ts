@@ -18,14 +18,14 @@ export async function GET(request: NextRequest) {
         );
       }
       locations = await sql`
-        SELECT location_id, tour_id, location_name 
+        SELECT location_id, tour_id, location_name, position_x, position_y 
         FROM locations 
         WHERE tour_id = ${tourIdNum} 
         ORDER BY location_id
       ` as Location[];
     } else {
       locations = await sql`
-        SELECT location_id, tour_id, location_name 
+        SELECT location_id, tour_id, location_name, position_x, position_y 
         FROM locations 
         ORDER BY location_id
       ` as Location[];
@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { tour_id, location_name } = validationResult.data;
+    const { tour_id, location_name, position_x, position_y } =
+      validationResult.data;
 
     // Validate tour_id exists
     const tourCheck =
@@ -70,9 +71,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await sql`
-      INSERT INTO locations (tour_id, location_name)
-      VALUES (${tour_id}, ${location_name})
-      RETURNING location_id, tour_id, location_name
+      INSERT INTO locations (tour_id, location_name, position_x, position_y)
+      VALUES (${tour_id}, ${location_name}, ${position_x}, ${position_y})
+      RETURNING location_id, tour_id, location_name, position_x, position_y
     ` as Location[];
 
     return NextResponse.json(

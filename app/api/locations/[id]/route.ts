@@ -17,7 +17,7 @@ export async function GET(
     }
 
     const result = await sql`
-      SELECT location_id, tour_id, location_name 
+      SELECT location_id, tour_id, location_name, position_x, position_y 
       FROM locations 
       WHERE location_id = ${id}
     ` as Location[];
@@ -67,7 +67,8 @@ export async function PUT(
       );
     }
 
-    const { tour_id, location_name } = validationResult.data;
+    const { tour_id, location_name, position_x, position_y } =
+      validationResult.data;
 
     // Validate tour_id if provided
     if (tour_id !== undefined) {
@@ -94,6 +95,12 @@ export async function PUT(
     if (location_name !== undefined) {
       updates.push(`location_name = ${escapeSqlString(location_name)}`);
     }
+    if (position_x !== undefined) {
+      updates.push(`position_x = ${position_x}`);
+    }
+    if (position_y !== undefined) {
+      updates.push(`position_y = ${position_y}`);
+    }
 
     if (updates.length === 0) {
       return NextResponse.json(
@@ -106,7 +113,7 @@ export async function PUT(
       UPDATE locations 
       SET ${updates.join(", ")}
       WHERE location_id = ${id}
-      RETURNING location_id, tour_id, location_name
+      RETURNING location_id, tour_id, location_name, position_x, position_y
     `;
     
     const result = (await sql(query)) as Location[];

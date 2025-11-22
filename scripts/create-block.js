@@ -50,6 +50,8 @@ async function runBlockOperations() {
     const locationData = {
       tour_id: tourId,
       location_name: 'Test Location',
+      position_x: 0.5,
+      position_y: 0.75,
     };
 
     const locationCreateResponse = await fetch(`${API_URL}/api/locations`, {
