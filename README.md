@@ -26,6 +26,33 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Testing Neon Database
+
+To test your Neon database connection:
+
+1. Create a `.env.local` file in the root directory:
+
+   ```bash
+   DATABASE_URL=postgresql://username:password@hostname/database?sslmode=require
+   ```
+
+   Get your connection string from [Neon Console](https://console.neon.tech/).
+
+2. Run the test script:
+   ```bash
+   npm run test:neon
+   # or
+   yarn test:neon
+   # or
+   pnpm test:neon
+   ```
+
+The test will:
+
+- Check database connection
+- List all tables in the public schema
+- Get the current database timestamp
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
