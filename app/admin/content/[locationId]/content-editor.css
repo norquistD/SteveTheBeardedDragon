@@ -1,0 +1,239 @@
+.content-editor-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.editor-header {
+  margin-bottom: 2rem;
+}
+
+.editor-header h1 {
+  color: var(--dark-green);
+  font-size: 2rem;
+  margin-top: 1rem;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background: var(--cream);
+  border: 2px solid var(--light-green);
+  color: var(--dark-green);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: var(--light-green);
+  color: white;
+}
+
+.editor-section {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.editor-section h2 {
+  color: var(--dark-green);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.title-editor {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.title-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  border: 2px solid var(--light-green);
+  border-radius: 6px;
+  font-family: inherit;
+  color: var(--dark-green);
+}
+
+.title-input:focus {
+  outline: none;
+  border-color: var(--dark-green);
+}
+
+.save-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--dark-green);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.save-button:hover:not(:disabled) {
+  background: var(--light-green);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.add-block-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--light-green);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-block-button:hover:not(:disabled) {
+  background: var(--dark-green);
+}
+
+.add-block-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.blocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.block-editor {
+  border: 2px solid var(--cream);
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #fafafa;
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.block-header-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.block-number {
+  font-weight: 700;
+  color: var(--dark-green);
+  font-size: 1.1rem;
+}
+
+.delete-block-button {
+  padding: 0.5rem 1rem;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.delete-block-button:hover:not(:disabled) {
+  background: #b71c1c;
+}
+
+.delete-block-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.block-content-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.content-editor-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.content-editor-column label {
+  font-weight: 600;
+  color: var(--dark-green);
+  font-size: 0.9rem;
+}
+
+.type-select {
+  padding: 0.5rem;
+  border: 2px solid var(--light-green);
+  border-radius: 6px;
+  font-family: inherit;
+  color: var(--dark-green);
+  background: white;
+}
+
+.type-select:focus {
+  outline: none;
+  border-color: var(--dark-green);
+}
+
+.content-textarea {
+  padding: 0.75rem;
+  border: 2px solid var(--light-green);
+  border-radius: 6px;
+  font-family: inherit;
+  color: var(--dark-green);
+  min-height: 120px;
+  resize: vertical;
+}
+
+.content-textarea:focus {
+  outline: none;
+  border-color: var(--dark-green);
+}
+
+.no-blocks {
+  text-align: center;
+  color: var(--dark-green);
+  font-style: italic;
+  opacity: 0.7;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .content-editor-container {
+    padding: 1rem;
+  }
+
+  .title-editor {
+    flex-direction: column;
+  }
+
+  .block-content-row {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+}

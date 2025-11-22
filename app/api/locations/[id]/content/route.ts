@@ -65,11 +65,11 @@ export async function GET(
         c2.content as right_content,
         c2.is_url as right_is_url
       FROM blocks b
-      LEFT JOIN contents c1 ON b.content_id_left = c1.content_id
-      LEFT JOIN contents c2 ON b.content_id_right = c2.content_id
-      WHERE b.location_id = ${locationId}
+      LEFT JOIN contents c1 ON b.content_id_left = c1.content_id 
         AND (c1.is_url = true OR c1.language_id = ${languageId})
+      LEFT JOIN contents c2 ON b.content_id_right = c2.content_id
         AND (c2.is_url = true OR c2.language_id = ${languageId})
+      WHERE b.location_id = ${locationId}
       ORDER BY b.position NULLS FIRST
     `) as BlockRow[];
 

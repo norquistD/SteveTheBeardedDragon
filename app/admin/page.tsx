@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import "./admin.css";
 
 const DOME_MAPS: Record<number, string> = {
@@ -25,6 +26,7 @@ interface Tour {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [selectedDomeId, setSelectedDomeId] = useState<number | "tours">(4);
   const [positionX, setPositionX] = useState<number>(0.5);
   const [positionY, setPositionY] = useState<number>(0.5);
@@ -290,6 +292,14 @@ export default function AdminPage() {
                       ({location.position_x.toFixed(3)},{" "}
                       {location.position_y.toFixed(3)})
                     </span>
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/content/${location.location_id}`)
+                      }
+                      className="edit-button"
+                    >
+                      Edit Content
+                    </button>
                     <button
                       onClick={() => handleDeleteLocation(location.location_id)}
                       disabled={loading}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../../app/LandingPage.css";
 import "./DomePage.css";
@@ -35,6 +35,7 @@ const DOME_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function DomePage({ params }: { params: { type: string } }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tourId = searchParams.get("route_id");
   const [locations, setLocations] = useState<Location[]>([]);
@@ -94,6 +95,9 @@ export default function DomePage({ params }: { params: { type: string } }) {
                     bottom: `${location.position_y * 100}%`,
                   }}
                   title={location.location_name}
+                  onClick={() =>
+                    router.push(`/info/${location.location_id}?language_id=4`)
+                  }
                 >
                   <div className="markerDot"></div>
                 </div>
