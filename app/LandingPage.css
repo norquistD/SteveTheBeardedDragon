@@ -18,3 +18,8 @@
   font-weight: bold;
   font-size: 16px;
 }
+
+.mapContainer {
+  border-top: 5px solid var(--dark-green);
+  border-bottom: 5px solid var(--dark-green);
+}

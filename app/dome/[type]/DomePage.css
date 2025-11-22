@@ -1,0 +1,14 @@
+.dome-page-title {
+  text-align: center;
+  margin: 1.5rem 0 1rem 0;
+  font-size: 1.5rem;
+  color: var(--dark-green);
+}
+
+.dome-page-description {
+  text-align: center;
+  margin: 1.5rem 2rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--dark-green);
+}

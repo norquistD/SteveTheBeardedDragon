@@ -47,14 +47,12 @@ export default function InfoPage({ initialData = sampleData }: InfoPageProps) {
       <h1>{initialData.title}</h1>
       <div className="info-body">
         {initialData.content.map((block) => (
-          <div className="block">
-            <BlockCard
-              leftType={block.leftType}
-              leftContent={block.leftContent}
-              rightType={block.rightType}
-              rightContent={block.rightContent}
-            />
-          </div>
+          <BlockCard
+            leftType={block.leftType}
+            leftContent={block.leftContent}
+            rightType={block.rightType}
+            rightContent={block.rightContent}
+          />
         ))}
       </div>
     </div>

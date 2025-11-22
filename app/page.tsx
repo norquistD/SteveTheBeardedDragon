@@ -45,6 +45,64 @@ export default function LandingPage() {
   ];
   return (
     <>
+      <h2
+        style={{
+          textAlign: "center",
+          margin: "1.5rem 0 1rem 0",
+          fontSize: "1.5rem",
+          color: "var(--dark-green)",
+        }}
+      >
+        Explore the domes yourself!
+      </h2>
+      <div className="mapContainer">
+        <TransformWrapper
+          doubleClick={{ disabled: false }}
+          wheel={{ disabled: false }}
+          panning={{ disabled: false }}
+          zoomAnimation={{ disabled: false }}
+          minScale={0.5}
+          maxScale={4}
+        >
+          <TransformComponent>
+            <div style={{ position: "relative", width: "100%" }}>
+              <img
+                src="/complete_map.png"
+                alt="Complete Map"
+                style={{ width: "100%", display: "block", touchAction: "none" }}
+              />
+              {/* Dome Markers */}
+              {markers.map((marker) => (
+                <div
+                  key={marker.id}
+                  onClick={marker.onClick}
+                  className="dome-marker"
+                  style={{
+                    top: `${marker.yPercent}%`,
+                    left: `${marker.xPercent}%`,
+                    background: marker.color || "red",
+                  }}
+                  title={marker.label}
+                >
+                  <span className="dome-marker-label">
+                    {marker.label ? marker.label.split(" ")[0][0] : "M"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </TransformComponent>
+        </TransformWrapper>
+      </div>
+      <h3
+        style={{
+          textAlign: "center",
+          margin: "1.5rem 0",
+          fontSize: "1.25rem",
+          color: "var(--dark-green)",
+        }}
+      >
+        Or take a guided tour:
+      </h3>
       <button
         style={{
           margin: "16px 0",
@@ -57,42 +115,6 @@ export default function LandingPage() {
       >
         Go to Info Page
       </button>
-      <TransformWrapper
-        doubleClick={{ disabled: false }}
-        wheel={{ disabled: false }}
-        panning={{ disabled: false }}
-        zoomAnimation={{ disabled: false }}
-        minScale={0.5}
-        maxScale={4}
-      >
-        <TransformComponent>
-          <div style={{ position: "relative", width: "100%" }}>
-            <img
-              src="/complete_map.png"
-              alt="Complete Map"
-              style={{ width: "100%", display: "block", touchAction: "none" }}
-            />
-            {/* Dome Markers */}
-            {markers.map((marker) => (
-              <div
-                key={marker.id}
-                onClick={marker.onClick}
-                className="dome-marker"
-                style={{
-                  top: `${marker.yPercent}%`,
-                  left: `${marker.xPercent}%`,
-                  background: marker.color || "red",
-                }}
-                title={marker.label}
-              >
-                <span className="dome-marker-label">
-                  {marker.label ? marker.label.split(" ")[0][0] : "M"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </TransformComponent>
-      </TransformWrapper>
     </>
   );
 }
