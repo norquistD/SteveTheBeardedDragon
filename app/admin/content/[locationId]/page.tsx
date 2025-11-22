@@ -102,49 +102,21 @@ export default function ContentEditorPage({
         setLocation(locationResult.data);
       }
 
-      // Fetch blocks for this location
-      const blocksResponse = await fetch(
-        `/api/blocks?location_id=${locationId}`
+      // Fetch content using the new GET endpoint
+      if (!languageId) return;
+
+      const contentResponse = await fetch(
+        `/api/locations/${locationId}/content?language_id=${languageId}`
       );
-      const blocksResult = await blocksResponse.json();
+      const contentResult = await contentResponse.json();
 
-      if (blocksResult.success) {
-        // Fetch content for each block
-        const blocksWithContent = await Promise.all(
-          blocksResult.data.map(async (block: Block) => {
-            const leftContent = block.content_id_left
-              ? await fetchContent(block.content_id_left)
-              : undefined;
-            const rightContent = block.content_id_right
-              ? await fetchContent(block.content_id_right)
-              : undefined;
+      if (contentResult.success) {
+        const { title: fetchedTitle, content } = contentResult.data;
 
-            // If this is the title block (position is null), set the title
-            if (block.position === null && leftContent) {
-              setTitle(leftContent.content);
-              setTitleBlock({
-                ...block,
-                leftContent,
-                rightContent: rightContent || undefined,
-              });
-            }
+        // Set title
+        setTitle(fetchedTitle);
 
-            return {
-              ...block,
-              leftContent,
-              rightContent,
-            };
-          })
-        );
-
-        // Filter out title block and sort by position
-        const contentBlocks = blocksWithContent
-          .filter((b) => b.position !== null)
-          .sort((a, b) => (a.position || 0) - (b.position || 0));
-
-        setBlocks(contentBlocks);
-
-        // Initialize editing state
+        // Initialize editing state for content blocks
         const initialEditState: Record<
           number,
           {
@@ -154,31 +126,51 @@ export default function ContentEditorPage({
             rightIsUrl: boolean;
           }
         > = {};
-        contentBlocks.forEach((block) => {
-          initialEditState[block.block_id] = {
-            leftContent: block.leftContent?.content || "",
-            rightContent: block.rightContent?.content || "",
-            leftIsUrl: block.leftContent?.is_url || false,
-            rightIsUrl: block.rightContent?.is_url || false,
-          };
-        });
-        setEditingBlocks(initialEditState);
+
+        // Convert content data to blocks format for editing
+        // We need to fetch the actual block IDs, so we still need the blocks endpoint
+        const blocksResponse = await fetch(
+          `/api/blocks?location_id=${locationId}`
+        );
+        const blocksResult = await blocksResponse.json();
+
+        if (blocksResult.success) {
+          // Filter out title block and match with content data
+          const contentBlocks = blocksResult.data
+            .filter((b: Block) => b.position !== null)
+            .sort(
+              (a: Block, b: Block) => (a.position || 0) - (b.position || 0)
+            );
+
+          // Store title block separately
+          const titleBlockData = blocksResult.data.find(
+            (b: Block) => b.position === null
+          );
+          if (titleBlockData) {
+            setTitleBlock(titleBlockData);
+          }
+
+          setBlocks(contentBlocks);
+
+          // Map content from the new endpoint to blocks
+          contentBlocks.forEach((block: Block, index: number) => {
+            if (index < content.length) {
+              initialEditState[block.block_id] = {
+                leftContent: content[index].leftContent,
+                rightContent: content[index].rightContent,
+                leftIsUrl: content[index].leftType === "url",
+                rightIsUrl: content[index].rightType === "url",
+              };
+            }
+          });
+
+          setEditingBlocks(initialEditState);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch location data:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchContent = async (contentId: number): Promise<Content | null> => {
-    try {
-      const response = await fetch(`/api/contents/${contentId}`);
-      const result = await response.json();
-      return result.success ? result.data : null;
-    } catch (error) {
-      console.error("Failed to fetch content:", error);
-      return null;
     }
   };
 
@@ -264,6 +256,56 @@ export default function ContentEditorPage({
       fetchLocationData();
     } catch (error) {
       console.error("Failed to save title:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    if (!languageId) {
+      console.error("No language selected");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Build content array from editing state
+      const content = blocks.map((block) => {
+        const editState = editingBlocks[block.block_id];
+        return {
+          leftContent: editState.leftContent,
+          leftType: editState.leftIsUrl
+            ? ("url" as const)
+            : ("paragraph" as const),
+          rightContent: editState.rightContent,
+          rightType: editState.rightIsUrl
+            ? ("url" as const)
+            : ("paragraph" as const),
+        };
+      });
+
+      // Use PUT endpoint to upsert all content at once
+      const response = await fetch(`/api/locations/${locationId}/content`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          language_id: Number(languageId),
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert("Content saved successfully!");
+        fetchLocationData();
+      } else {
+        alert("Failed to save content: " + result.error);
+        console.error("Failed to save content:", result.error);
+      }
+    } catch (error) {
+      alert("Failed to save content");
+      console.error("Failed to save all content:", error);
     } finally {
       setLoading(false);
     }
@@ -355,50 +397,6 @@ export default function ContentEditorPage({
     }
   };
 
-  const handleSaveBlock = async (block: Block) => {
-    if (!languageId) {
-      console.error("No language selected");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const editState = editingBlocks[block.block_id];
-
-      // Update left content if it exists
-      if (block.leftContent) {
-        await fetch(`/api/contents/${block.leftContent.content_id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: editState.leftContent,
-            is_url: editState.leftIsUrl,
-            language_id: Number(languageId),
-          }),
-        });
-      }
-
-      // Update right content if it exists
-      if (block.rightContent) {
-        await fetch(`/api/contents/${block.rightContent.content_id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: editState.rightContent,
-            is_url: editState.rightIsUrl,
-            language_id: Number(languageId),
-          }),
-        });
-      }
-
-      fetchLocationData();
-    } catch (error) {
-      console.error("Failed to save block:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteBlock = async (blockId: number) => {
     setLoading(true);
     try {
@@ -441,26 +439,12 @@ export default function ContentEditorPage({
             placeholder="Enter title"
             className="title-input"
           />
-          <button
-            onClick={handleSaveTitle}
-            disabled={loading}
-            className="save-button"
-          >
-            Save Title
-          </button>
         </div>
       </div>
 
       <div className="editor-section">
         <div className="section-header">
           <h2>Content Blocks</h2>
-          <button
-            onClick={handleAddBlock}
-            disabled={loading}
-            className="add-block-button"
-          >
-            + Add Block
-          </button>
         </div>
 
         <div className="blocks-list">
@@ -476,22 +460,13 @@ export default function ContentEditorPage({
               <div key={block.block_id} className="block-editor">
                 <div className="block-header">
                   <span className="block-number">Block {index + 1}</span>
-                  <div className="block-header-buttons">
-                    <button
-                      onClick={() => handleSaveBlock(block)}
-                      disabled={loading}
-                      className="save-button"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => handleDeleteBlock(block.block_id)}
-                      disabled={loading}
-                      className="delete-block-button"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleDeleteBlock(block.block_id)}
+                    disabled={loading}
+                    className="delete-block-button"
+                  >
+                    Delete
+                  </button>
                 </div>
 
                 <div className="block-content-row">
@@ -576,6 +551,22 @@ export default function ContentEditorPage({
               No content blocks yet. Click "Add Block" to create one.
             </p>
           )}
+          <div className="header-buttons">
+            <button
+              onClick={handleAddBlock}
+              disabled={loading}
+              className="add-block-button"
+            >
+              + Add Block
+            </button>
+            <button
+              onClick={handleSaveAll}
+              disabled={loading}
+              className="save-all-button"
+            >
+              Save All Changes
+            </button>
+          </div>
         </div>
       </div>
     </div>

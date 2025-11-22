@@ -66,36 +66,12 @@ export const updateContentSchema = z.object({
 });
 
 // Block Schemas
-export const createBlockSchema = z
-  .object({
-    content_id_left: z.number().int().positive().nullable().optional(),
-    content_id_right: z.number().int().positive().nullable().optional(),
-    location_id: z.number().int().positive(),
-    position: z.number().int().min(0).max(99).nullable().optional(),
-  })
-  .refine(
-    (data) => {
-      // If position is NULL, both content_id_left and content_id_right must be provided
-      if (data.position === null || data.position === undefined) {
-        return (
-          data.content_id_left !== null &&
-          data.content_id_left !== undefined &&
-          data.content_id_right !== null &&
-          data.content_id_right !== undefined
-        );
-      }
-      // If position is NOT NULL, at least one of content_id_left or content_id_right must be provided
-      return (
-        (data.content_id_left !== null &&
-          data.content_id_left !== undefined) ||
-        (data.content_id_right !== null && data.content_id_right !== undefined)
-      );
-    },
-    {
-      message:
-        "Position NULL requires both content_id_left and content_id_right. Position requires at least one of content_id_left or content_id_right",
-    }
-  );
+export const createBlockSchema = z.object({
+  content_id_left: z.number().int().positive().nullable().optional(),
+  content_id_right: z.number().int().positive().nullable().optional(),
+  location_id: z.number().int().positive(),
+  position: z.number().int().min(0).max(99).nullable().optional(),
+});
 
 export const updateBlockSchema = z.object({
   content_id_left: z.number().int().positive().nullable().optional(),
@@ -103,4 +79,3 @@ export const updateBlockSchema = z.object({
   location_id: z.number().int().positive().optional(),
   position: z.number().int().min(0).max(99).nullable().optional(),
 });
-

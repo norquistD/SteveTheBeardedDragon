@@ -179,6 +179,9 @@ export default function AdminPage() {
 
   return (
     <div className="admin-container">
+      <button onClick={() => router.push("/")} className="back-button">
+        ← Back to Landing
+      </button>
       <h1 className="admin-title">Admin Dashboard</h1>
 
       <div className="admin-tabs">
