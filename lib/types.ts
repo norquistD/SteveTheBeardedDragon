@@ -48,6 +48,14 @@ export interface Plant {
   plant_scientific_name: string;
 }
 
+export interface PlantBlock {
+  block_id: number;
+  content_id_left: number | null;
+  content_id_right: number | null;
+  plant_id: number;
+  position: number | null;
+}
+
 export interface ApiResponse<T> {
   success: true;
   data: T;

@@ -118,3 +118,18 @@ export const updatePlantSchema = z.object({
   plant_name: z.string().max(255).optional(),
   plant_scientific_name: z.string().max(255).optional(),
 });
+
+// Plant Block Schemas
+export const createPlantBlockSchema = z.object({
+  content_id_left: z.number().int().positive().nullable().optional(),
+  content_id_right: z.number().int().positive().nullable().optional(),
+  plant_id: z.number().int().positive(),
+  position: z.number().int().min(0).max(99).nullable().optional(),
+});
+
+export const updatePlantBlockSchema = z.object({
+  content_id_left: z.number().int().positive().nullable().optional(),
+  content_id_right: z.number().int().positive().nullable().optional(),
+  plant_id: z.number().int().positive().optional(),
+  position: z.number().int().min(0).max(99).nullable().optional(),
+});
