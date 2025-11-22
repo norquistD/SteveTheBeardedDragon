@@ -7,10 +7,6 @@ export interface InfoPageData {
   content: Block[];
 }
 
-export interface InfoPageProps {
-  initialData: InfoPageData;
-}
-
 const sampleData: InfoPageData = {
   title: "Sample Info Page",
   content: [
@@ -41,13 +37,15 @@ const sampleData: InfoPageData = {
   ],
 };
 
-export default function InfoPage({ initialData = sampleData }: InfoPageProps) {
+export default function InfoPage() {
+  const initialData = sampleData;
+  
   return (
     <div className="info-page">
       <h1>{initialData.title}</h1>
       <div className="info-body">
-        {initialData.content.map((block) => (
-          <div className="block">
+        {initialData.content.map((block, index) => (
+          <div key={index} className="block">
             <BlockCard
               leftType={block.leftType}
               leftContent={block.leftContent}

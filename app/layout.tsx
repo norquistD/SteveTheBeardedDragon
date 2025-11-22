@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Steve The Bearded Dragon",
-  description: "Rub my Belly HELLO",
+  description: "Rub my Belly",
 };
 
 export default function RootLayout({
