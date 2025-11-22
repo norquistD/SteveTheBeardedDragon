@@ -1,0 +1,22 @@
+{
+  "landing": {
+    "title": "Explore the domes yourself!",
+    "subtitle": "Tap on a dome to learn more",
+    "guidedTour": "Or take a guided tour:",
+    "infoPage": "Go to Info Page",
+    "adminDashboard": "Admin Dashboard"
+  },
+  "domes": {
+    "floral": "Floral Show Dome",
+    "desert": "Arid Desert Dome",
+    "tropical": "Tropical Jungle Dome"
+  },
+  "dome": {
+    "desertTitle": "Desert Dome",
+    "showTitle": "Floral Show Dome",
+    "tropicalTitle": "Tropical Dome",
+    "desertDescription": "The Desert Dome is divided geographically into Old World and New World habitats. Visit the Sonoran, Northern Mexico, and even mountainous South American desert plantings.",
+    "showDescription": "The Mitchell Park Horticultural Conservatory's Show Dome is transformed five times each year. Each Show Dome display has a specific theme, generally categorized as historical, cultural or fantasy, and is chosen at least a year in advance.",
+    "tropicalDescription": "As you tour the Tropical Dome, take care to look up, as well as from side to side. In addition to the plants, there are several species of tropical finches, koi fish, frogs and toads, and even a world of insects living here."
+  }
+}

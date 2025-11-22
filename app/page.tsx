@@ -2,6 +2,7 @@
 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import "./LandingPage.css";
 
 // Marker interface
@@ -16,11 +17,13 @@ export interface MapMarker {
 
 export default function LandingPage() {
   const router = useRouter();
+  const t = useTranslations();
+
   // Dome marker positions (estimated visually from the provided map)
   const markers: MapMarker[] = [
     {
       id: "floral-show",
-      label: "Floral Show Dome",
+      label: t("domes.floral"),
       xPercent: 24,
       yPercent: 24,
       color: "#b96fd9",
@@ -28,7 +31,7 @@ export default function LandingPage() {
     },
     {
       id: "arid-desert",
-      label: "Arid Desert Dome",
+      label: t("domes.desert"),
       xPercent: 72.5,
       yPercent: 26,
       color: "#e6d36f",
@@ -36,7 +39,7 @@ export default function LandingPage() {
     },
     {
       id: "tropical-jungle",
-      label: "Tropical Jungle Dome",
+      label: t("domes.tropical"),
       xPercent: 73,
       yPercent: 76,
       color: "#3a7d3a",
@@ -53,7 +56,7 @@ export default function LandingPage() {
           color: "var(--dark-green)",
         }}
       >
-        Explore the domes yourself! <br /> Tap on a dome to learn more
+        {t("landing.title")} <br /> {t("landing.subtitle")}
       </h2>
       <div className="mapContainer">
         <TransformWrapper
@@ -96,7 +99,7 @@ export default function LandingPage() {
           color: "var(--dark-green)",
         }}
       >
-        Or take a guided tour:
+        {t("landing.guidedTour")}
       </h3>
       <div
         style={{
@@ -116,7 +119,7 @@ export default function LandingPage() {
           }}
           onClick={() => router.push("/info")}
         >
-          Go to Info Page
+          {t("landing.infoPage")}
         </button>
         <button
           style={{
@@ -131,7 +134,7 @@ export default function LandingPage() {
           }}
           onClick={() => router.push("/admin")}
         >
-          Admin Dashboard
+          {t("landing.adminDashboard")}
         </button>
       </div>
     </>

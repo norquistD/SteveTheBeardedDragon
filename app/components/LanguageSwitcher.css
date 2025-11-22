@@ -1,0 +1,161 @@
+.language-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.language-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.language-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--cream);
+}
+
+.language-modal-header h2 {
+  margin: 0;
+  color: var(--dark-green);
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--dark-green);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.close-button:hover {
+  background: var(--cream);
+}
+
+.language-modal-content {
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.loading-text {
+  text-align: center;
+  color: var(--dark-green);
+  padding: 2rem;
+  font-style: italic;
+}
+
+.language-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.language-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background: white;
+  border: 2px solid var(--cream);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.language-item:hover {
+  background: var(--cream);
+  border-color: var(--light-green);
+  transform: translateX(4px);
+}
+
+.language-item.active {
+  background: var(--light-green);
+  border-color: var(--dark-green);
+  color: white;
+}
+
+.language-item.active .language-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.language-native {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--dark-green);
+  margin-bottom: 0.25rem;
+}
+
+.language-item.active .language-native {
+  color: white;
+}
+
+.language-name {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .language-modal {
+    width: 95%;
+    max-height: 70vh;
+  }
+
+  .language-modal-header {
+    padding: 1rem;
+  }
+
+  .language-modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .language-item {
+    padding: 0.875rem 1rem;
+  }
+}

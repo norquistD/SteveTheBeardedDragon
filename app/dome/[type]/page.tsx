@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useLocale } from "../../components/IntlProvider";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../../app/LandingPage.css";
 import "./DomePage.css";
@@ -20,30 +22,20 @@ const MAPS: Record<string, string> = {
   tropical: "/tropical_map.png",
 };
 
-const DOME_TITLES: Record<string, string> = {
-  desert: "Desert Dome",
-  show: "Floral Show Dome",
-  tropical: "Tropical Dome",
-};
-
-const DOME_DESCRIPTIONS: Record<string, string> = {
-  desert:
-    "The Desert Dome is divided geographically into Old World and New World habitats. Visit the Sonoran, Northern Mexico, and even mountainous South American desert plantings.",
-  show: "The Mitchell Park Horticultural Conservatory’s Show Dome is transformed five times each year. Each Show Dome display has a specific theme, generally categorized as historical, cultural or fantasy, and is chosen at least a year in advance.",
-  tropical:
-    "As you tour the Tropical Dome, take care to look up, as well as from side to side. In addition to the plants, there are several species of tropical finches, koi fish, frogs and toads, and even a world of insects living here.",
-};
-
 export default function DomePage({ params }: { params: { type: string } }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("dome");
+  const { languageId } = useLocale();
   const tourId = searchParams.get("route_id");
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const mapSrc = MAPS[params.type] || MAPS["desert"];
-  const title = DOME_TITLES[params.type] || "Dome";
-  const description = DOME_DESCRIPTIONS[params.type] || "";
+
+  const type = params.type;
+  const title = t(`${type}Title`);
+  const description = t(`${type}Description`);
 
   useEffect(() => {
     if (tourId) {
@@ -96,7 +88,9 @@ export default function DomePage({ params }: { params: { type: string } }) {
                   }}
                   title={location.location_name}
                   onClick={() =>
-                    router.push(`/info/${location.location_id}?language_id=4`)
+                    router.push(
+                      `/info/${location.location_id}?language_id=${languageId}`
+                    )
                   }
                 >
                   <div className="markerDot"></div>

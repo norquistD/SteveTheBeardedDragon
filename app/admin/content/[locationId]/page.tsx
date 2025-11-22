@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "../../../components/IntlProvider";
 import "./content-editor.css";
 
 interface Content {
@@ -32,12 +33,12 @@ export default function ContentEditorPage({
   params: { locationId: string };
 }) {
   const router = useRouter();
+  const { languageId } = useLocale();
   const locationId = parseInt(params.locationId);
   const [location, setLocation] = useState<Location | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [title, setTitle] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [languageId, setLanguageId] = useState<number | null>(null);
   const [editingBlocks, setEditingBlocks] = useState<
     Record<
       number,
@@ -52,44 +53,8 @@ export default function ContentEditorPage({
   const [titleBlock, setTitleBlock] = useState<Block | null>(null);
 
   useEffect(() => {
-    fetchLanguages();
-  }, []);
-
-  useEffect(() => {
-    if (languageId !== null) {
-      fetchLocationData();
-    }
+    fetchLocationData();
   }, [locationId, languageId]);
-
-  const fetchLanguages = async () => {
-    try {
-      const response = await fetch("/api/languages");
-      const result = await response.json();
-
-      if (result.success && result.data.length > 0) {
-        // Use first available language
-        setLanguageId(Number(result.data[0].language_id));
-      } else {
-        // Create a default language if none exist
-        const createResponse = await fetch("/api/languages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            language_code: "en",
-            language_name: "English",
-            language_native_name: "English",
-          }),
-        });
-
-        const createResult = await createResponse.json();
-        if (createResult.success) {
-          setLanguageId(Number(createResult.data.language_id));
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch languages:", error);
-    }
-  };
 
   const fetchLocationData = async () => {
     setLoading(true);
@@ -412,7 +377,7 @@ export default function ContentEditorPage({
     }
   };
 
-  if (!location || languageId === null) {
+  if (!location) {
     return (
       <div className="content-editor-container">
         <p>Loading...</p>
