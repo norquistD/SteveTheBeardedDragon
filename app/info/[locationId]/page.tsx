@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useLocale } from "../../components/IntlProvider";
 import { type Block, BlockCard } from "../BlockCard";
 import "../InfoPage.css";
 
@@ -15,13 +16,24 @@ export default function InfoPage({
 }: {
   params: { locationId: string };
 }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { languageId: contextLanguageId } = useLocale();
   const languageId = searchParams.get("language_id") || "1";
   const locationId = params.locationId;
 
   const [pageData, setPageData] = useState<InfoPageData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Update URL when context language changes
+  useEffect(() => {
+    if (contextLanguageId && languageId !== contextLanguageId.toString()) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("language_id", contextLanguageId.toString());
+      router.replace(`/info/${locationId}?${params.toString()}`);
+    }
+  }, [contextLanguageId, locationId, router]);
 
   useEffect(() => {
     fetchPageData();
