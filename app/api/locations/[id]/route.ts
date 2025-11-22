@@ -5,27 +5,27 @@ import { updateLocationSchema } from "@/lib/schemas";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
         { success: false, error: "Invalid ID" } as ApiError,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const result = await sql`
-      SELECT location_id, tour_id, location_name, position_x, position_y 
+    const result = (await sql`
+      SELECT location_id, tour_id, location_name, location_label, position_x, position_y 
       FROM locations 
       WHERE location_id = ${id}
-    ` as Location[];
+    `) as Location[];
 
     if (result.length === 0) {
       return NextResponse.json(
         { success: false, error: "Location not found" } as ApiError,
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -36,21 +36,21 @@ export async function GET(
   } catch (error) {
     return NextResponse.json(
       { success: false, error: "Failed to fetch location" } as ApiError,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
         { success: false, error: "Invalid ID" } as ApiError,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -63,11 +63,11 @@ export async function PUT(
           success: false,
           error: `Validation error: ${validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
         } as ApiError,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const { tour_id, location_name, position_x, position_y } =
+    const { tour_id, location_name, location_label, position_x, position_y } =
       validationResult.data;
 
     // Validate tour_id if provided
@@ -77,7 +77,7 @@ export async function PUT(
       if (tourCheck.length === 0) {
         return NextResponse.json(
           { success: false, error: "Tour not found" } as ApiError,
-          { status: 404 },
+          { status: 404 }
         );
       }
     }
@@ -95,6 +95,9 @@ export async function PUT(
     if (location_name !== undefined) {
       updates.push(`location_name = ${escapeSqlString(location_name)}`);
     }
+    if (location_label !== undefined) {
+      updates.push(`location_label = ${escapeSqlString(location_label)}`);
+    }
     if (position_x !== undefined) {
       updates.push(`position_x = ${position_x}`);
     }
@@ -105,7 +108,7 @@ export async function PUT(
     if (updates.length === 0) {
       return NextResponse.json(
         { success: false, error: "No fields to update" } as ApiError,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -113,15 +116,15 @@ export async function PUT(
       UPDATE locations 
       SET ${updates.join(", ")}
       WHERE location_id = ${id}
-      RETURNING location_id, tour_id, location_name, position_x, position_y
+      RETURNING location_id, tour_id, location_name, location_label, position_x, position_y
     `;
-    
+
     const result = (await sql(query)) as Location[];
 
     if (result.length === 0) {
       return NextResponse.json(
         { success: false, error: "Location not found" } as ApiError,
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -132,34 +135,34 @@ export async function PUT(
   } catch (error) {
     return NextResponse.json(
       { success: false, error: "Failed to update location" } as ApiError,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
         { success: false, error: "Invalid ID" } as ApiError,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     // Check for existing blocks
     const blocks =
-      await sql`SELECT block_id FROM blocks WHERE location_id = ${id}` as Block[];
+      (await sql`SELECT block_id FROM blocks WHERE location_id = ${id}`) as Block[];
     if (blocks.length > 0) {
       return NextResponse.json(
         {
           success: false,
           error: "Cannot delete location with existing blocks",
         } as ApiError,
-        { status: 409 },
+        { status: 409 }
       );
     }
 
@@ -169,7 +172,7 @@ export async function DELETE(
     if (result.length === 0) {
       return NextResponse.json(
         { success: false, error: "Location not found" } as ApiError,
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -180,7 +183,7 @@ export async function DELETE(
   } catch (error) {
     return NextResponse.json(
       { success: false, error: "Failed to delete location" } as ApiError,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

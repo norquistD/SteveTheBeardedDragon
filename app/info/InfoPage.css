@@ -8,6 +8,7 @@
 .info-page h1 {
     color: var(--dark-green);
     font-size: 2.5em;
+    text-overflow: clip;
 }
 
 .info-body {

@@ -28,6 +28,7 @@ export const updateTourSchema = z.object({
 export const createLocationSchema = z.object({
   tour_id: z.number().int().positive(),
   location_name: z.string().max(255),
+  location_label: z.string().max(255),
   position_x: z.number().min(0).max(1),
   position_y: z.number().min(0).max(1),
 });
@@ -35,6 +36,7 @@ export const createLocationSchema = z.object({
 export const updateLocationSchema = z.object({
   tour_id: z.number().int().positive().optional(),
   location_name: z.string().max(255).optional(),
+  location_label: z.string().max(255).optional(),
   position_x: z.number().min(0).max(1).optional(),
   position_y: z.number().min(0).max(1).optional(),
 });
@@ -84,8 +86,14 @@ export const updateBlockSchema = z.object({
 // Note: TTS API supports mp3, opus, aac, flac. Wav is converted to mp3.
 export const generateAudioSchema = z.object({
   prompt: z.string().min(1),
-  voice: z.enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"]).optional().default("alloy"),
-  format: z.enum(["wav", "mp3", "opus", "aac", "flac"]).optional().default("mp3"),
+  voice: z
+    .enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"])
+    .optional()
+    .default("alloy"),
+  format: z
+    .enum(["wav", "mp3", "opus", "aac", "flac"])
+    .optional()
+    .default("mp3"),
 });
 
 // Translation Schemas
@@ -99,4 +107,3 @@ export const translateSchema = z.object({
 export const moderateSchema = z.object({
   input: z.string().min(1),
 });
-

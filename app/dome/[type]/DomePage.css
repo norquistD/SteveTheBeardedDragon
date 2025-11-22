@@ -15,7 +15,7 @@
 
 .mapMarker {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0%);
   cursor: pointer;
   z-index: 2;
   transition: transform 0.2s ease;
@@ -26,8 +26,8 @@
 }
 
 .markerDot {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   background-color: var(--light-green);
   border: 2px solid white;
   border-radius: 50%;
@@ -39,3 +39,12 @@
   transform: scale(1.2);
   transition: all 0.2s ease;
 }
+
+.markerLabel {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-align: center;
+  transform: translateY(2px);
+}
+

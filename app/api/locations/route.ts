@@ -14,21 +14,21 @@ export async function GET(request: NextRequest) {
       if (isNaN(tourIdNum)) {
         return NextResponse.json(
           { success: false, error: "Invalid tour_id" } as ApiError,
-          { status: 400 },
+          { status: 400 }
         );
       }
-      locations = await sql`
-        SELECT location_id, tour_id, location_name, position_x, position_y 
+      locations = (await sql`
+        SELECT location_id, tour_id, location_name, location_label, position_x, position_y 
         FROM locations 
         WHERE tour_id = ${tourIdNum} 
         ORDER BY location_id
-      ` as Location[];
+      `) as Location[];
     } else {
-      locations = await sql`
-        SELECT location_id, tour_id, location_name, position_x, position_y 
+      locations = (await sql`
+        SELECT location_id, tour_id, location_name, location_label, position_x, position_y 
         FROM locations 
         ORDER BY location_id
-      ` as Location[];
+      `) as Location[];
     }
 
     return NextResponse.json({ success: true, data: locations } as ApiResponse<
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { success: false, error: "Failed to fetch locations" } as ApiError,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
           success: false,
           error: `Validation error: ${validationResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
         } as ApiError,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const { tour_id, location_name, position_x, position_y } =
+    const { tour_id, location_name, location_label, position_x, position_y } =
       validationResult.data;
 
     // Validate tour_id exists
@@ -66,24 +66,24 @@ export async function POST(request: NextRequest) {
     if (tourCheck.length === 0) {
       return NextResponse.json(
         { success: false, error: "Tour not found" } as ApiError,
-        { status: 404 },
+        { status: 404 }
       );
     }
 
-    const result = await sql`
-      INSERT INTO locations (tour_id, location_name, position_x, position_y)
-      VALUES (${tour_id}, ${location_name}, ${position_x}, ${position_y})
-      RETURNING location_id, tour_id, location_name, position_x, position_y
-    ` as Location[];
+    const result = (await sql`
+      INSERT INTO locations (tour_id, location_name, location_label, position_x, position_y)
+      VALUES (${tour_id}, ${location_name}, ${location_label}, ${position_x}, ${position_y})
+      RETURNING location_id, tour_id, location_name, location_label, position_x, position_y
+    `) as Location[];
 
     return NextResponse.json(
       { success: true, data: result[0] } as ApiResponse<Location>,
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
       { success: false, error: "Failed to create location" } as ApiError,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

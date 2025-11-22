@@ -13,6 +13,7 @@ interface Location {
   location_id: number;
   tour_id: number;
   location_name: string;
+  location_label: string;
   position_x: number;
   position_y: number;
 }
@@ -95,7 +96,9 @@ export default function DomePage({ params }: { params: { type: string } }) {
                     )
                   }
                 >
-                  <div className="markerDot"></div>
+                  <div className="markerDot">
+                    <p className="markerLabel">{location.location_label}</p>
+                  </div>
                 </div>
               ))}
             </div>

@@ -25,6 +25,7 @@ interface Block {
 interface Location {
   location_id: number;
   location_name: string;
+  location_label: string;
 }
 
 export default function ContentEditorPage({
