@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
+import BackButton from "../../components/BackButton";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../../app/LandingPage.css";
 import "./DomePage.css";
@@ -61,6 +62,7 @@ export default function DomePage({ params }: { params: { type: string } }) {
 
   return (
     <>
+      <BackButton />
       <h2 className="dome-page-title">{title}</h2>
       <div className="mapContainer">
         <TransformWrapper

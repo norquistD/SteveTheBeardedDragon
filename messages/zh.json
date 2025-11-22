@@ -7,13 +7,13 @@
     "adminDashboard": "管理仪表板"
   },
   "domes": {
-    "floral": "花卉展览温室",
-    "desert": "干旱沙漠温室",
-    "tropical": "热带丛林温室"
+    "floral": "展览温室",
+    "desert": "沙漠温室",
+    "tropical": "热带温室"
   },
   "dome": {
     "desertTitle": "沙漠温室",
-    "showTitle": "花卉展览温室",
+    "showTitle": "展览温室",
     "tropicalTitle": "热带温室",
     "desertDescription": "沙漠温室按地理位置分为旧世界和新世界栖息地。参观索诺拉沙漠、墨西哥北部，甚至南美洲山区的沙漠植物种植区。",
     "showDescription": "米切尔公园园艺温室的展览温室每年改造五次。每个展览温室展示都有特定的主题，通常分为历史、文化或幻想类别，并至少提前一年选定。",
@@ -25,5 +25,8 @@
   },
   "info": {
     "notAvailable": "抱歉给您带来不便，此内容暂未提供{language}版本。"
+  },
+  "navigation": {
+    "back": "返回"
   }
 }

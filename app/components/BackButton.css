@@ -1,0 +1,17 @@
+.back-button {
+  padding: 0.5rem 1rem;
+  background: var(--cream);
+  border: 2px solid var(--light-green);
+  color: var(--dark-green);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem 1rem;
+}
+
+.back-button:hover {
+  background: var(--light-green);
+  color: white;
+}

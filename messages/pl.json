@@ -7,13 +7,13 @@
     "adminDashboard": "Panel administratora"
   },
   "domes": {
-    "floral": "Kopuła Wystawy Kwiatowej",
-    "desert": "Kopuła Suchej Pustyni",
-    "tropical": "Kopuła Tropikalnej Dżungli"
+    "floral": "Kopuła Wystawowa",
+    "desert": "Kopuła Pustyni",
+    "tropical": "Kopuła Tropikalna"
   },
   "dome": {
     "desertTitle": "Kopuła Pustyni",
-    "showTitle": "Kopuła Wystawy Kwiatowej",
+    "showTitle": "Kopuła Wystawowa",
     "tropicalTitle": "Kopuła Tropikalna",
     "desertDescription": "Kopuła Pustyni jest podzielona geograficznie na siedliska Starego i Nowego Świata. Odwiedź nasadzenia pustyni Sonora, północnego Meksyku, a nawet górskich obszarów Ameryki Południowej.",
     "showDescription": "Kopuła Wystawowa Konserwatorium Ogrodniczego w Mitchell Park jest przekształcana pięć razy w roku. Każda wystawa w Kopule Wystawowej ma określony temat, zazwyczaj sklasyfikowany jako historyczny, kulturowy lub fantastyczny i wybierany jest co najmniej rok wcześniej.",
@@ -25,5 +25,8 @@
   },
   "info": {
     "notAvailable": "Przepraszamy za niedogodności, ta treść nie jest jeszcze dostępna w języku {language}."
+  },
+  "navigation": {
+    "back": "Wróć"
   }
 }

@@ -70,7 +70,7 @@ export default function LandingPage() {
           <TransformComponent>
             <div style={{ position: "relative", width: "100%" }}>
               <img
-                src="/complete_map.png"
+                src="/complete_map2.png"
                 alt="Complete Map"
                 style={{ width: "100%", display: "block", touchAction: "none" }}
               />
@@ -85,7 +85,9 @@ export default function LandingPage() {
                     left: `${marker.xPercent}%`,
                   }}
                   title={marker.label}
-                />
+                >
+                  <p className="dome-marker-label">{marker.label}</p>
+                </div>
               ))}
             </div>
           </TransformComponent>

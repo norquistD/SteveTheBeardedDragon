@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
+import BackButton from "../../components/BackButton";
 import { type Block, BlockCard } from "../BlockCard";
 import "../InfoPage.css";
 
@@ -67,6 +68,7 @@ export default function InfoPage({
   if (loading) {
     return (
       <div className="info-page">
+        <BackButton />
         <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
           Loading...
         </p>
@@ -77,6 +79,7 @@ export default function InfoPage({
   if (error || !pageData) {
     return (
       <div className="info-page">
+        <BackButton />
         <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
           {error || "No content found"}
         </p>
@@ -91,6 +94,7 @@ export default function InfoPage({
   if (!hasContent) {
     return (
       <div className="info-page">
+        <BackButton />
         <p
           style={{
             textAlign: "center",
@@ -108,6 +112,7 @@ export default function InfoPage({
 
   return (
     <div className="info-page">
+      <BackButton />
       <h1>{pageData.title}</h1>
       <div className="info-body">
         {pageData.content.map((block, index) => (

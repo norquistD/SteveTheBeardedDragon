@@ -14,9 +14,15 @@
 }
 
 .dome-marker-label {
-  color: white;
+  color: var(--dark-green);
   font-weight: bold;
   font-size: 16px;
+  text-align: center;
+  background-color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
 }
 
 .mapContainer {
