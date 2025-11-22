@@ -1,14 +1,14 @@
 .dome-marker {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 20vw;
-  height: 20vw;
+  width: 43%;
+  height: 43%;
   border-radius: 50%;
-  border: 2px solid white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: transparent;
   box-shadow: 0 0 8px rgba(0,0,0,0.3);
   z-index: 2;
 }

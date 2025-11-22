@@ -21,24 +21,24 @@ export default function LandingPage() {
     {
       id: "floral-show",
       label: "Floral Show Dome",
-      xPercent: 23,
-      yPercent: 28,
+      xPercent: 24,
+      yPercent: 24,
       color: "#b96fd9",
       onClick: () => router.push("/dome/show?route_id=5"),
     },
     {
       id: "arid-desert",
       label: "Arid Desert Dome",
-      xPercent: 73,
-      yPercent: 22,
+      xPercent: 72.5,
+      yPercent: 26,
       color: "#e6d36f",
       onClick: () => router.push("/dome/desert?route_id=4"),
     },
     {
       id: "tropical-jungle",
       label: "Tropical Jungle Dome",
-      xPercent: 75,
-      yPercent: 75,
+      xPercent: 73,
+      yPercent: 76,
       color: "#3a7d3a",
       onClick: () => router.push("/dome/tropical?route_id=6"),
     },
@@ -53,7 +53,7 @@ export default function LandingPage() {
           color: "var(--dark-green)",
         }}
       >
-        Explore the domes yourself!
+        Explore the domes yourself! <br /> Tap on a dome to learn more
       </h2>
       <div className="mapContainer">
         <TransformWrapper
@@ -80,14 +80,9 @@ export default function LandingPage() {
                   style={{
                     top: `${marker.yPercent}%`,
                     left: `${marker.xPercent}%`,
-                    background: marker.color || "red",
                   }}
                   title={marker.label}
-                >
-                  <span className="dome-marker-label">
-                    {marker.label ? marker.label.split(" ")[0][0] : "M"}
-                  </span>
-                </div>
+                />
               ))}
             </div>
           </TransformComponent>
