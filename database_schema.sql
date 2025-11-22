@@ -56,3 +56,17 @@ CREATE TABLE IF NOT EXISTS blocks (
         )
     )
 );
+
+CREATE TABLE IF NOT EXISTS plants (
+    plant_id BIGSERIAL PRIMARY KEY,
+    plant_name VARCHAR(255) NOT NULL,
+    plant_scientific_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS plant_blocks (
+    block_id BIGSERIAL PRIMARY KEY,
+    content_id_left BIGINT REFERENCES contents(content_id) DEFAULT NULL,
+    content_id_right BIGINT REFERENCES contents(content_id) DEFAULT NULL,
+    plant_id BIGINT REFERENCES plants(plant_id) NOT NULL,
+    position INTEGER -- NULL = Plant Name/Scientific Name, 0-99 = CONTENT BLOCKS
+);

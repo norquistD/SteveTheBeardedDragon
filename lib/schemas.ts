@@ -107,3 +107,14 @@ export const translateSchema = z.object({
 export const moderateSchema = z.object({
   input: z.string().min(1),
 });
+
+// Plant Schemas
+export const createPlantSchema = z.object({
+  plant_name: z.string().max(255),
+  plant_scientific_name: z.string().max(255),
+});
+
+export const updatePlantSchema = z.object({
+  plant_name: z.string().max(255).optional(),
+  plant_scientific_name: z.string().max(255).optional(),
+});

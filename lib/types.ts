@@ -42,6 +42,12 @@ export interface Block {
   position: number | null;
 }
 
+export interface Plant {
+  plant_id: number;
+  plant_name: string;
+  plant_scientific_name: string;
+}
+
 export interface ApiResponse<T> {
   success: true;
   data: T;
