@@ -1,8 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../../app/LandingPage.css";
 import "./DomePage.css";
+
+interface Location {
+  location_id: number;
+  tour_id: number;
+  location_name: string;
+  position_x: number;
+  position_y: number;
+}
 
 const MAPS: Record<string, string> = {
   desert: "/desert_map.png",
@@ -25,9 +35,36 @@ const DOME_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function DomePage({ params }: { params: { type: string } }) {
+  const searchParams = useSearchParams();
+  const tourId = searchParams.get("route_id");
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const mapSrc = MAPS[params.type] || MAPS["desert"];
   const title = DOME_TITLES[params.type] || "Dome";
   const description = DOME_DESCRIPTIONS[params.type] || "";
+
+  useEffect(() => {
+    if (tourId) {
+      fetchLocations();
+    }
+  }, [tourId]);
+
+  const fetchLocations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/locations?tour_id=${tourId}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setLocations(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch locations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -48,6 +85,19 @@ export default function DomePage({ params }: { params: { type: string } }) {
                 alt={`${params.type} map`}
                 style={{ width: "100%", display: "block", touchAction: "none" }}
               />
+              {locations.map((location) => (
+                <div
+                  key={location.location_id}
+                  className="mapMarker"
+                  style={{
+                    left: `${location.position_x * 100}%`,
+                    bottom: `${location.position_y * 100}%`,
+                  }}
+                  title={location.location_name}
+                >
+                  <div className="markerDot"></div>
+                </div>
+              ))}
             </div>
           </TransformComponent>
         </TransformWrapper>

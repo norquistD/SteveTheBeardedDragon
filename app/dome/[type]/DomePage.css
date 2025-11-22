@@ -12,3 +12,25 @@
   line-height: 1.6;
   color: var(--dark-green);
 }
+
+.mapMarker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.markerDot {
+  width: 20px;
+  height: 20px;
+  background-color: var(--light-green);
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.markerDot:hover {
+  background-color: var(--dark-green);
+  transform: scale(1.2);
+  transition: all 0.2s ease;
+}

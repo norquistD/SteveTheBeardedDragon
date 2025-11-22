@@ -24,7 +24,7 @@ export default function LandingPage() {
       xPercent: 23,
       yPercent: 28,
       color: "#b96fd9",
-      onClick: () => router.push("/dome/show"),
+      onClick: () => router.push("/dome/show?route_id=5"),
     },
     {
       id: "arid-desert",
@@ -32,7 +32,7 @@ export default function LandingPage() {
       xPercent: 73,
       yPercent: 22,
       color: "#e6d36f",
-      onClick: () => router.push("/dome/desert"),
+      onClick: () => router.push("/dome/desert?route_id=4"),
     },
     {
       id: "tropical-jungle",
@@ -40,7 +40,7 @@ export default function LandingPage() {
       xPercent: 75,
       yPercent: 75,
       color: "#3a7d3a",
-      onClick: () => router.push("/dome/tropical"),
+      onClick: () => router.push("/dome/tropical?route_id=6"),
     },
   ];
   return (
@@ -103,18 +103,42 @@ export default function LandingPage() {
       >
         Or take a guided tour:
       </h3>
-      <button
+      <div
         style={{
-          margin: "16px 0",
-          padding: "8px 20px",
-          fontSize: 18,
-          borderRadius: 8,
-          cursor: "pointer",
+          display: "flex",
+          gap: "1rem",
+          justifyContent: "center",
+          flexWrap: "wrap",
         }}
-        onClick={() => router.push("/info")}
       >
-        Go to Info Page
-      </button>
+        <button
+          style={{
+            margin: "16px 0",
+            padding: "8px 20px",
+            fontSize: 18,
+            borderRadius: 8,
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/info")}
+        >
+          Go to Info Page
+        </button>
+        <button
+          style={{
+            margin: "16px 0",
+            padding: "8px 20px",
+            fontSize: 18,
+            borderRadius: 8,
+            cursor: "pointer",
+            backgroundColor: "var(--dark-green)",
+            color: "var(--light-text)",
+            border: "none",
+          }}
+          onClick={() => router.push("/admin")}
+        >
+          Admin Dashboard
+        </button>
+      </div>
     </>
   );
 }
