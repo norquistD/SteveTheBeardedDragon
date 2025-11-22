@@ -79,3 +79,24 @@ export const updateBlockSchema = z.object({
   location_id: z.number().int().positive().optional(),
   position: z.number().int().min(0).max(99).nullable().optional(),
 });
+
+// Audio Generation Schemas
+// Note: TTS API supports mp3, opus, aac, flac. Wav is converted to mp3.
+export const generateAudioSchema = z.object({
+  prompt: z.string().min(1),
+  voice: z.enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"]).optional().default("alloy"),
+  format: z.enum(["wav", "mp3", "opus", "aac", "flac"]).optional().default("mp3"),
+});
+
+// Translation Schemas
+export const translateSchema = z.object({
+  text: z.string().min(1),
+  source_language: z.string().min(1),
+  target_language: z.string().min(1),
+});
+
+// Moderation Schemas
+export const moderateSchema = z.object({
+  input: z.string().min(1),
+});
+

@@ -9,12 +9,16 @@
     "lint": "next lint",
     "prettier-ci": "prettier --check .",
     "prettier-write": "prettier --write .",
-    "test:neon": "node test-neon.js"
+    "test:neon": "node test-neon.js",
+    "test:audio": "node test-audio.js",
+    "test:translate": "node test-translate.js",
+    "test:moderate": "node test-moderate.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
     "next": "^14.2.5",
     "next-intl": "^4.5.5",
+    "openai": "^4.0.0",
     "prettier": "^3.6.2",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
