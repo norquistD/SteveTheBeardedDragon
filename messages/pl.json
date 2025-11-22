@@ -1,0 +1,26 @@
+{
+  "landing": {
+    "title": "Odkryj kopuły samodzielnie!",
+    "subtitle": "Dotknij kopuły, aby dowiedzieć się więcej",
+    "guidedTour": "Lub wybierz wycieczkę z przewodnikiem:",
+    "infoPage": "Przejdź do strony informacyjnej",
+    "adminDashboard": "Panel administratora"
+  },
+  "domes": {
+    "floral": "Kopuła Wystawy Kwiatowej",
+    "desert": "Kopuła Suchej Pustyni",
+    "tropical": "Kopuła Tropikalnej Dżungli"
+  },
+  "dome": {
+    "desertTitle": "Kopuła Pustyni",
+    "showTitle": "Kopuła Wystawy Kwiatowej",
+    "tropicalTitle": "Kopuła Tropikalna",
+    "desertDescription": "Kopuła Pustyni jest podzielona geograficznie na siedliska Starego i Nowego Świata. Odwiedź nasadzenia pustyni Sonora, północnego Meksyku, a nawet górskich obszarów Ameryki Południowej.",
+    "showDescription": "Kopuła Wystawowa Konserwatorium Ogrodniczego w Mitchell Park jest przekształcana pięć razy w roku. Każda wystawa w Kopule Wystawowej ma określony temat, zazwyczaj sklasyfikowany jako historyczny, kulturowy lub fantastyczny i wybierany jest co najmniej rok wcześniej.",
+    "tropicalDescription": "Podczas zwiedzania Kopuły Tropikalnej pamiętaj, aby patrzeć w górę, a także na boki. Oprócz roślin żyje tu kilka gatunków tropikalnych łuszczaków, karpi koi, żab i ropuch, a nawet cały świat owadów."
+  },
+  "languageSwitcher": {
+    "title": "Wybierz język",
+    "loading": "Ładowanie języków..."
+  }
+}

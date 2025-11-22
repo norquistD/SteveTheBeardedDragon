@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import "./LanguageSwitcher.css";
 
 interface Language {
@@ -23,6 +24,7 @@ export default function LanguageSwitcher({
   currentLanguageId,
   onLanguageChange,
 }: LanguageSwitcherProps) {
+  const t = useTranslations("languageSwitcher");
   const [languages, setLanguages] = useState<Language[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +61,7 @@ export default function LanguageSwitcher({
     <div className="language-modal-overlay" onClick={onClose}>
       <div className="language-modal" onClick={(e) => e.stopPropagation()}>
         <div className="language-modal-header">
-          <h2>Select Language</h2>
+          <h2>{t("title")}</h2>
           <button className="close-button" onClick={onClose}>
             ✕
           </button>
@@ -67,7 +69,7 @@ export default function LanguageSwitcher({
 
         <div className="language-modal-content">
           {loading ? (
-            <p className="loading-text">Loading languages...</p>
+            <p className="loading-text">{t("loading")}</p>
           ) : (
             <div className="language-list">
               {languages.map((language) => (
