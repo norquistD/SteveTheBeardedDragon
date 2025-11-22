@@ -68,7 +68,7 @@ export default function DomePage({ params }: { params: { type: string } }) {
           wheel={{ disabled: false }}
           panning={{ disabled: false }}
           zoomAnimation={{ disabled: false }}
-          minScale={0.5}
+          minScale={1}
           maxScale={4}
         >
           <TransformComponent>
