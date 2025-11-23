@@ -133,3 +133,6 @@ export const updatePlantBlockSchema = z.object({
   plant_id: z.number().int().positive().optional(),
   position: z.number().int().min(0).max(99).nullable().optional(),
 });
+
+// Web Search Schema (no request body needed, plant_id comes from route)
+export const webSearchSchema = z.object({});

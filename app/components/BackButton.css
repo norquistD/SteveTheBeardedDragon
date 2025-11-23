@@ -1,17 +1,21 @@
 .back-button {
-  padding: 0.5rem 1rem;
-  background: var(--cream);
-  border: 2px solid var(--light-green);
-  color: var(--dark-green);
-  font-weight: 600;
+  background: none;
+  border: none;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  color: var(--cream);
   font-size: 1rem;
-  margin: 1rem 0 0.5rem 1rem;
+  font-weight: 600;
 }
 
 .back-button:hover {
-  background: var(--light-green);
-  color: white;
+  transform: scale(1.1);
+}
+
+.back-button:active {
+  transform: scale(0.95);
 }

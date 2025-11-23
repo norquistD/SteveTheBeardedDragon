@@ -12,7 +12,7 @@
     background-color: var(--dark-green);
     border-bottom: 5px solid var(--light-green);
     color: var(--light-text);
-    padding: 0.5rem 1.5rem;
+    padding: 0.5rem 1.5rem 0.5rem 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     position: fixed;
     top: 0;
@@ -25,6 +25,14 @@
     margin-top: 70px;
     flex: 1;
     overflow-y: auto;
+}
+
+.header-left-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
 }
 
 .header h1 {

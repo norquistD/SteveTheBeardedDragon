@@ -1,6 +1,5 @@
 "use client";
 
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import "./LandingPage.css";
@@ -59,39 +58,28 @@ export default function LandingPage() {
         {t("landing.title")} <br /> {t("landing.subtitle")}
       </h2>
       <div className="mapContainer">
-        <TransformWrapper
-          doubleClick={{ disabled: false }}
-          wheel={{ disabled: false }}
-          panning={{ disabled: false }}
-          zoomAnimation={{ disabled: false }}
-          minScale={1}
-          maxScale={4}
-        >
-          <TransformComponent>
-            <div style={{ position: "relative", width: "100%" }}>
-              <img
-                src="/complete_map2.png"
-                alt="Complete Map"
-                style={{ width: "100%", display: "block", touchAction: "none" }}
-              />
-              {/* Dome Markers */}
-              {markers.map((marker) => (
-                <div
-                  key={marker.id}
-                  onClick={marker.onClick}
-                  className="dome-marker"
-                  style={{
-                    top: `${marker.yPercent}%`,
-                    left: `${marker.xPercent}%`,
-                  }}
-                  title={marker.label}
-                >
-                  <p className="dome-marker-label">{marker.label}</p>
-                </div>
-              ))}
+        <div style={{ position: "relative", width: "100%" }}>
+          <img
+            src="/complete_map2.png"
+            alt="Complete Map"
+            style={{ width: "100%", display: "block", touchAction: "none" }}
+          />
+          {/* Dome Markers */}
+          {markers.map((marker) => (
+            <div
+              key={marker.id}
+              onClick={marker.onClick}
+              className="dome-marker"
+              style={{
+                top: `${marker.yPercent}%`,
+                left: `${marker.xPercent}%`,
+              }}
+              title={marker.label}
+            >
+              <p className="dome-marker-label">{marker.label}</p>
             </div>
-          </TransformComponent>
-        </TransformWrapper>
+          ))}
+        </div>
       </div>
       <h3
         style={{

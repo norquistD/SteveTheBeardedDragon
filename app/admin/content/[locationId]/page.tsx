@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "../../../components/IntlProvider";
+import Spinner from "../../../components/Spinner";
 import "./content-editor.css";
 
 interface Content {
@@ -211,13 +212,20 @@ export default function ContentEditorPage({
   if (!location) {
     return (
       <div className="content-editor-container">
-        <p>Loading...</p>
+        <div className="spinner-container">
+          <Spinner size="large" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="content-editor-container">
+      {loading && (
+        <div className="spinner-overlay">
+          <Spinner size="large" />
+        </div>
+      )}
       <div className="editor-header">
         <button onClick={() => router.push("/admin")} className="back-button">
           ← Back to Admin

@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
-import BackButton from "../../components/BackButton";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../../app/LandingPage.css";
 import "./DomePage.css";
 
@@ -64,51 +62,37 @@ export default function DomePage({ params }: { params: { type: string } }) {
 
   return (
     <>
-      <div className="button-controls">
-        <BackButton />
-      </div>
       <h2 className="dome-page-title">{title}</h2>
       <div className="mapContainer">
-        <TransformWrapper
-          doubleClick={{ disabled: false }}
-          wheel={{ disabled: false }}
-          panning={{ disabled: false }}
-          zoomAnimation={{ disabled: false }}
-          minScale={1}
-          maxScale={4}
-        >
-          <TransformComponent>
-            <div style={{ position: "relative", width: "100%" }}>
-              <img
-                src={mapSrc}
-                alt={`${params.type} map`}
-                style={{ width: "100%", display: "block", touchAction: "none" }}
-              />
-              {locations.map((location) => (
-                <div
-                  key={location.location_id}
-                  className="mapMarker"
-                  style={{
-                    left: `${location.position_x * 100}%`,
-                    bottom: `${location.position_y * 100}%`,
-                  }}
-                  title={location.location_name}
-                  onClick={() =>
-                    router.push(
-                      `/info/${location.location_id}?language_id=${languageId}`
-                    )
-                  }
-                >
-                  <div className="markerDot">
-                    {showLabels && (
-                      <p className="markerLabel">{location.location_label}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
+        <div style={{ position: "relative", width: "100%" }}>
+          <img
+            src={mapSrc}
+            alt={`${params.type} map`}
+            style={{ width: "100%", display: "block", touchAction: "none" }}
+          />
+          {locations.map((location) => (
+            <div
+              key={location.location_id}
+              className="mapMarker"
+              style={{
+                left: `${location.position_x * 100}%`,
+                bottom: `${location.position_y * 100}%`,
+              }}
+              title={location.location_name}
+              onClick={() =>
+                router.push(
+                  `/info/${location.location_id}?language_id=${languageId}`
+                )
+              }
+            >
+              <div className="markerDot">
+                {showLabels && (
+                  <p className="markerLabel">{location.location_label}</p>
+                )}
+              </div>
             </div>
-          </TransformComponent>
-        </TransformWrapper>
+          ))}
+        </div>
         {!loading && (
           <button
             onClick={() => setShowLabels(!showLabels)}

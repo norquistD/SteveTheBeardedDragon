@@ -1,26 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import BackButton from "../components/BackButton";
+import { Plant } from "@/lib/types";
+import Spinner from "../components/Spinner";
 import "./search.css";
 
 export default function SearchPage() {
+  const router = useRouter();
   const t = useTranslations("search");
   const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState<Plant[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const isInitialMount = useRef(true);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (query: string) => {
+    setLoading(true);
+    setError(null);
+    setHasSearched(true);
+
+    try {
+      const url = query.trim() 
+        ? `/api/search?q=${encodeURIComponent(query.trim())}`
+        : `/api/search?q=`;
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (result.success) {
+        setResults(result.data);
+      } else {
+        setError(result.error || "Failed to search");
+        setResults([]);
+      }
+    } catch (err) {
+      setError("Failed to search. Please try again.");
+      setResults([]);
+      console.error("Search error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load all plants on first mount, then debounce search when searchQuery changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      // Initial load - no debounce
+      handleSearch("");
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Subsequent searches - debounce
+    const handler = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 300); // Debounce time
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]); // Re-run effect when searchQuery changes
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Search functionality to be implemented
-    console.log("Searching for:", searchQuery);
+    handleSearch(searchQuery);
   };
 
   return (
     <>
-      <BackButton />
       <div className="search-page">
         <h1 className="search-title">{t("title")}</h1>
-        <form onSubmit={handleSearch} className="search-form">
+        <form onSubmit={handleFormSubmit} className="search-form">
           <div className="search-input-wrapper">
             <svg
               className="search-icon"
@@ -43,9 +95,52 @@ export default function SearchPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("placeholder")}
               className="search-input"
+              disabled={loading}
             />
           </div>
         </form>
+
+        {loading && (
+          <div className="search-loading">
+            <Spinner size="medium" />
+          </div>
+        )}
+
+        {error && (
+          <div className="search-error">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && hasSearched && results.length === 0 && (
+          <div className="search-no-results">
+            <p>No plants found matching "{searchQuery}"</p>
+          </div>
+        )}
+
+        {!loading && !error && results.length > 0 && (
+          <div className="search-results">
+            <h2 className="search-results-title">
+              Found {results.length} {results.length === 1 ? "plant" : "plants"}
+            </h2>
+            <ul className="search-results-list">
+              {results.map((plant) => (
+                <li
+                  key={plant.plant_id}
+                  className="search-result-item"
+                  onClick={() => router.push(`/plant/${plant.plant_id}`)}
+                >
+                  <div className="plant-scientific-name">
+                    {plant.plant_scientific_name}
+                  </div>
+                  { plant.plant_scientific_name !== plant.plant_name && (
+                    <div className="plant-name">{plant.plant_name}</div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </>
   );

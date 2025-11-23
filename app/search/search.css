@@ -46,3 +46,76 @@
 .search-input::placeholder {
   color: rgba(0, 0, 0, 0.4);
 }
+
+.search-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.search-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.search-error,
+.search-no-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--dark-green);
+  font-size: 1.1rem;
+}
+
+.search-error {
+  color: #d32f2f;
+}
+
+.search-results {
+  margin-top: 2rem;
+}
+
+.search-results-title {
+  color: var(--dark-green);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.search-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-result-item {
+  background-color: var(--cream);
+  border: 2px solid var(--light-green);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.search-result-item:hover {
+  border-color: var(--dark-green);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.plant-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 0.5rem;
+}
+
+.plant-scientific-name {
+  font-size: 1.3rem;
+  color: var(--light-green);
+  font-style: italic;
+  font-weight: 500;
+}

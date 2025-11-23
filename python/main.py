@@ -11,4 +11,8 @@ df_output['Common Name'] = df_output['Common Name'].fillna(df_output['Scientific
 # Also handle empty strings
 df_output.loc[df_output['Common Name'].str.strip() == '', 'Common Name'] = df_output.loc[df_output['Common Name'].str.strip() == '', 'Scientific Name']
 
+# Normalize: capitalize first letter of each word
+df_output['Common Name'] = df_output['Common Name'].str.title()
+df_output['Scientific Name'] = df_output['Scientific Name'].str.title()
+
 df_output.to_csv('plants_names.csv', index=False)

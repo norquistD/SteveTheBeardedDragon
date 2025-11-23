@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import Spinner from "./Spinner";
 import "./LanguageSwitcher.css";
 
 interface Language {
@@ -69,7 +70,9 @@ export default function LanguageSwitcher({
 
         <div className="language-modal-content">
           {loading ? (
-            <p className="loading-text">{t("loading")}</p>
+            <div className="spinner-container">
+              <Spinner size="medium" />
+            </div>
           ) : (
             <div className="language-list">
               {languages.map((language) => (

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "./IntlProvider";
 import LanguageButton from "./LanguageButton";
 import SearchButton from "./SearchButton";
+import BackButton from "./BackButton";
 
 export default function LayoutContent({
   children,
@@ -71,7 +72,10 @@ export default function LayoutContent({
   return (
     <>
       <div className="header">
-        <SearchButton />
+        <div className="header-left-buttons">
+          <BackButton />
+          <SearchButton />
+        </div>
         <h1>Steve&apos;s Stories</h1>
         <LanguageButton
           languageId={languageId}
