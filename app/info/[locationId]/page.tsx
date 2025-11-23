@@ -67,23 +67,27 @@ export default function InfoPage({
 
   if (loading) {
     return (
-      <div className="info-page">
+      <>
         <BackButton />
-        <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
-          Loading...
-        </p>
-      </div>
+        <div className="info-page">
+          <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
+            Loading...
+          </p>
+        </div>
+      </>
     );
   }
 
   if (error || !pageData) {
     return (
-      <div className="info-page">
+      <>
         <BackButton />
-        <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
-          {error || "No content found"}
-        </p>
-      </div>
+        <div className="info-page">
+          <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
+            {error || "No content found"}
+          </p>
+        </div>
+      </>
     );
   }
 
@@ -93,38 +97,42 @@ export default function InfoPage({
 
   if (!hasContent) {
     return (
-      <div className="info-page">
+      <>
         <BackButton />
-        <p
-          style={{
-            textAlign: "center",
-            color: "var(--dark-green)",
-            padding: "2rem",
-          }}
-        >
-          {t("notAvailable", {
-            language: languageNativeName || "this language",
-          })}
-        </p>
-      </div>
+        <div className="info-page">
+          <p
+            style={{
+              textAlign: "center",
+              color: "var(--dark-green)",
+              padding: "2rem",
+            }}
+          >
+            {t("notAvailable", {
+              language: languageNativeName || "this language",
+            })}
+          </p>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="info-page">
+    <>
       <BackButton />
-      <h1>{pageData.title}</h1>
-      <div className="info-body">
-        {pageData.content.map((block, index) => (
-          <BlockCard
-            key={index}
-            leftType={block.leftType}
-            leftContent={block.leftContent}
-            rightType={block.rightType}
-            rightContent={block.rightContent}
-          />
-        ))}
+      <div className="info-page">
+        <h1>{pageData.title}</h1>
+        <div className="info-body">
+          {pageData.content.map((block, index) => (
+            <BlockCard
+              key={index}
+              leftType={block.leftType}
+              leftContent={block.leftContent}
+              rightType={block.rightType}
+              rightContent={block.rightContent}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

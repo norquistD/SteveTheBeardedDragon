@@ -17,14 +17,14 @@ export function BlockCard({
     <div className="block">
       <div>
         {leftType === "paragraph" ? (
-          <p>{leftContent}</p>
+          <p className="block-text">{leftContent}</p>
         ) : (
           <img className="info-image" src={leftContent} alt="Left Content" />
         )}
       </div>
       <div>
         {rightType === "paragraph" ? (
-          <p>{rightContent}</p>
+          <p className="block-text">{rightContent}</p>
         ) : (
           <img className="info-image" src={rightContent} alt="Right Content" />
         )}
