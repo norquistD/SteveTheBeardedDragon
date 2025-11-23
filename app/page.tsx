@@ -106,18 +106,6 @@ export default function LandingPage() {
             fontSize: 18,
             borderRadius: 8,
             cursor: "pointer",
-          }}
-          onClick={() => router.push("/info")}
-        >
-          {t("landing.infoPage")}
-        </button>
-        <button
-          style={{
-            margin: "16px 0",
-            padding: "8px 20px",
-            fontSize: 18,
-            borderRadius: 8,
-            cursor: "pointer",
             backgroundColor: "var(--dark-green)",
             color: "var(--light-text)",
             border: "none",

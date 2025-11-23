@@ -6,11 +6,13 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
 import { type Block, BlockCard } from "../../info/BlockCard";
 import Spinner from "../../components/Spinner";
+import AudioPlayer from "../../components/AudioPlayer";
 import "../../info/InfoPage.css";
 
 export interface PlantPageData {
   title: string;
   content: Block[];
+  audioUrl?: string | null;
 }
 
 export default function PlantPage({
@@ -32,6 +34,9 @@ export default function PlantPage({
   const [error, setError] = useState<string | null>(null);
   const [webSearching, setWebSearching] = useState<boolean>(false);
   const [webSearchAttempted, setWebSearchAttempted] = useState<boolean>(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [generatingTTS, setGeneratingTTS] = useState<boolean>(false);
+  const [ttsAttempted, setTtsAttempted] = useState<boolean>(false);
 
   // Update URL when context language changes
   useEffect(() => {
@@ -76,14 +81,18 @@ export default function PlantPage({
         // Apply plant name fallback only for display purposes
         const apiTitle = result.data.title || "";
         const displayTitle = apiTitle || plantName || "";
+        const audioUrlFromApi = result.data.audioUrl || null;
         setPageData({
           ...result.data,
           title: displayTitle,
           // Store original API title to check if content actually exists
           _apiTitle: apiTitle,
         });
+        setAudioUrl(audioUrlFromApi);
         // Reset web search attempted flag when language or plant changes
         setWebSearchAttempted(false);
+        // Reset TTS attempted flag when language or plant changes
+        setTtsAttempted(false);
       } else {
         setError(result.error || "Failed to load content");
       }
@@ -493,7 +502,70 @@ export default function PlantPage({
     webSearchAttempted,
   ]);
 
-  if (loading || webSearching || fetchingPlantInfo) {
+  // Function to generate TTS audio
+  const generateTTSAudio = useCallback(async () => {
+    if (!languageId) {
+      console.error("Language ID is not available");
+      setGeneratingTTS(false);
+      return;
+    }
+
+    setGeneratingTTS(true);
+
+    try {
+      const response = await fetch(`/api/plants/${plantId}/tts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language_id: parseInt(languageId),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data.audioUrl) {
+        setAudioUrl(result.data.audioUrl);
+        // Refetch page data to get updated audio URL
+        await fetchPageData();
+      } else {
+        console.error("Failed to generate TTS audio:", result.error);
+      }
+    } catch (err) {
+      console.error("Error generating TTS audio:", err);
+    } finally {
+      setGeneratingTTS(false);
+    }
+  }, [plantId, languageId, fetchPageData]);
+
+  // Auto-generate TTS audio when content exists but audio doesn't
+  // Only generate after translation/web search is complete
+  useEffect(() => {
+    if (
+      pageData &&
+      hasContent &&
+      !webSearching &&
+      !loading &&
+      !generatingTTS &&
+      !audioUrl &&
+      !ttsAttempted
+    ) {
+      setTtsAttempted(true);
+      generateTTSAudio();
+    }
+  }, [
+    pageData,
+    hasContent,
+    webSearching,
+    loading,
+    generatingTTS,
+    audioUrl,
+    ttsAttempted,
+    generateTTSAudio,
+  ]);
+
+  if (loading || webSearching || fetchingPlantInfo || generatingTTS) {
     return (
       <>
         <div className="info-page">
@@ -539,7 +611,7 @@ export default function PlantPage({
 
   return (
     <>
-      <div className="info-page">
+      <div className="info-page" style={{ paddingBottom: audioUrl ? "80px" : "0" }}>
         <h1>{pageData.title}</h1>
         <div className="info-body">
           {pageData.content.map((block, index) => (
@@ -553,6 +625,7 @@ export default function PlantPage({
           ))}
         </div>
       </div>
+      {audioUrl && <AudioPlayer audioUrl={audioUrl} />}
     </>
   );
 }
