@@ -16,9 +16,9 @@ const DEFAULT_LANGUAGES = [
     language_native_name: "Español",
   },
   {
-    language_code: "pl",
-    language_name: "Polish",
-    language_native_name: "Polski",
+    language_code: "pt",
+    language_name: "Portuguese",
+    language_native_name: "Português",
   },
   {
     language_code: "ru",
