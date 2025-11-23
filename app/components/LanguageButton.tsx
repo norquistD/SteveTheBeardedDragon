@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useLocale } from "./IntlProvider";
 
 interface LanguageButtonProps {
   languageId: number | null;
@@ -13,6 +14,7 @@ export default function LanguageButton({
   setLanguageId,
 }: LanguageButtonProps) {
   const [isLanguageSwitcherOpen, setIsLanguageSwitcherOpen] = useState(false);
+  const { locale } = useLocale();
 
   const handleLanguageClick = () => {
     setIsLanguageSwitcherOpen(true);
@@ -48,6 +50,7 @@ export default function LanguageButton({
           <path d="M2 12h20" />
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
+        <span className="language-code">{locale.toUpperCase()}</span>
       </button>
 
       <LanguageSwitcher
