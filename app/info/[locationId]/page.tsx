@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
@@ -28,6 +28,8 @@ export default function InfoPage({
   const [pageData, setPageData] = useState<InfoPageData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [translating, setTranslating] = useState<boolean>(false);
+  const [translationAttempted, setTranslationAttempted] = useState<boolean>(false);
 
   // Update URL when context language changes
   useEffect(() => {
@@ -38,11 +40,7 @@ export default function InfoPage({
     }
   }, [contextLanguageId, locationId, router]);
 
-  useEffect(() => {
-    fetchPageData();
-  }, [locationId, languageId]);
-
-  const fetchPageData = async () => {
+  const fetchPageData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -54,6 +52,8 @@ export default function InfoPage({
 
       if (result.success) {
         setPageData(result.data);
+        // Reset translation attempted flag when language or location changes
+        setTranslationAttempted(false);
       } else {
         setError(result.error || "Failed to load content");
       }
@@ -63,15 +63,307 @@ export default function InfoPage({
     } finally {
       setLoading(false);
     }
+  }, [locationId, languageId]);
+
+  useEffect(() => {
+    fetchPageData();
+  }, [fetchPageData]);
+
+  // Helper function to find English language
+  const findEnglishLanguage = async (): Promise<number | null> => {
+    try {
+      const response = await fetch("/api/languages");
+      const result = await response.json();
+
+      if (result.success) {
+        const englishLang = result.data.find(
+          (lang: { language_code: string; language_name: string }) =>
+            lang.language_code === "en" || lang.language_name === "English"
+        );
+        return englishLang ? englishLang.language_id : null;
+      }
+      return null;
+    } catch (err) {
+      console.error("Failed to find English language:", err);
+      return null;
+    }
   };
 
-  if (loading) {
+  // Helper function to get current language info
+  const getCurrentLanguageInfo = async (): Promise<{ name: string } | null> => {
+    try {
+      const response = await fetch(`/api/languages/${languageId}`);
+      const result = await response.json();
+
+      if (result.success) {
+        return { name: result.data.language_name };
+      }
+      return null;
+    } catch (err) {
+      console.error("Failed to get current language info:", err);
+      return null;
+    }
+  };
+
+  // Helper function to moderate text
+  const moderateText = async (text: string): Promise<boolean> => {
+    try {
+      const response = await fetch("/api/moderate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input: text }),
+      });
+
+      const result = await response.json();
+      if (result.success && result.data.results && result.data.results.length > 0) {
+        // Return true if content is safe (not flagged)
+        return !result.data.results[0].flagged;
+      }
+      // If moderation fails, assume unsafe to be cautious
+      return false;
+    } catch (err) {
+      console.error("Failed to moderate text:", err);
+      // If moderation fails, assume unsafe to be cautious
+      return false;
+    }
+  };
+
+  // Function to translate and upload content
+  const translateAndUploadContent = useCallback(async () => {
+    setTranslating(true);
+
+    try {
+      // Find English language
+      const englishLanguageId = await findEnglishLanguage();
+      if (!englishLanguageId) {
+        console.error("English language not found");
+        setTranslating(false);
+        return;
+      }
+
+      // Skip translation if current language is English (English content should already exist)
+      if (parseInt(languageId) === englishLanguageId) {
+        console.log("Current language is English, skipping translation");
+        setTranslating(false);
+        return;
+      }
+
+      // Get current language info
+      const currentLangInfo = await getCurrentLanguageInfo();
+      if (!currentLangInfo) {
+        console.error("Failed to get current language info");
+        setTranslating(false);
+        return;
+      }
+
+      // Fetch English content
+      const englishContentResponse = await fetch(
+        `/api/locations/${locationId}/content?language_id=${englishLanguageId}`
+      );
+      const englishContentResult = await englishContentResponse.json();
+
+      if (!englishContentResult.success) {
+        console.error("Failed to fetch English content");
+        setTranslating(false);
+        return;
+      }
+
+      const englishContent: InfoPageData = englishContentResult.data;
+
+      // Check if English content exists and has content
+      const hasEnglishContent =
+        englishContent.title.trim() !== "" || englishContent.content.length > 0;
+
+      if (!hasEnglishContent) {
+        console.error("English content is empty");
+        setTranslating(false);
+        return;
+      }
+
+      // Translate title if it exists
+      let translatedTitle = englishContent.title;
+      if (englishContent.title.trim() !== "") {
+        let translationSuccess = false;
+        for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
+          try {
+            const translateResponse = await fetch("/api/translate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                text: englishContent.title,
+                source_language: "English",
+                target_language: currentLangInfo.name,
+              }),
+            });
+
+            const translateResult = await translateResponse.json();
+            if (translateResult.success) {
+              const translation = translateResult.data.translation;
+              // Moderate the translated title
+              const isSafe = await moderateText(translation);
+              if (isSafe) {
+                translatedTitle = translation;
+                translationSuccess = true;
+              } else {
+                console.warn(`Translated title failed moderation (attempt ${attempt}/3)`);
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to translate title (attempt ${attempt}/3):`, err);
+          }
+        }
+        if (!translationSuccess) {
+          console.warn("All translation attempts failed moderation, using English title");
+        }
+      }
+
+      // Translate content blocks
+      const translatedBlocks: Block[] = await Promise.all(
+        englishContent.content.map(async (block) => {
+          let translatedLeftContent = block.leftContent;
+          let translatedRightContent = block.rightContent;
+
+          // Translate left content if it's a paragraph
+          if (block.leftType === "paragraph" && block.leftContent.trim() !== "") {
+            let translationSuccess = false;
+            for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
+              try {
+                const translateResponse = await fetch("/api/translate", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    text: block.leftContent,
+                    source_language: "English",
+                    target_language: currentLangInfo.name,
+                  }),
+                });
+
+                const translateResult = await translateResponse.json();
+                if (translateResult.success) {
+                  const translation = translateResult.data.translation;
+                  // Moderate the translated content
+                  const isSafe = await moderateText(translation);
+                  if (isSafe) {
+                    translatedLeftContent = translation;
+                    translationSuccess = true;
+                  } else {
+                    console.warn(`Translated left content failed moderation (attempt ${attempt}/3)`);
+                  }
+                }
+              } catch (err) {
+                console.error(`Failed to translate left content (attempt ${attempt}/3):`, err);
+              }
+            }
+            if (!translationSuccess) {
+              console.warn("All translation attempts failed moderation, using English for left content");
+            }
+          }
+
+          // Translate right content if it's a paragraph
+          if (block.rightType === "paragraph" && block.rightContent.trim() !== "") {
+            let translationSuccess = false;
+            for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
+              try {
+                const translateResponse = await fetch("/api/translate", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    text: block.rightContent,
+                    source_language: "English",
+                    target_language: currentLangInfo.name,
+                  }),
+                });
+
+                const translateResult = await translateResponse.json();
+                if (translateResult.success) {
+                  const translation = translateResult.data.translation;
+                  // Moderate the translated content
+                  const isSafe = await moderateText(translation);
+                  if (isSafe) {
+                    translatedRightContent = translation;
+                    translationSuccess = true;
+                  } else {
+                    console.warn(`Translated right content failed moderation (attempt ${attempt}/3)`);
+                  }
+                }
+              } catch (err) {
+                console.error(`Failed to translate right content (attempt ${attempt}/3):`, err);
+              }
+            }
+            if (!translationSuccess) {
+              console.warn("All translation attempts failed moderation, using English for right content");
+            }
+          }
+
+          return {
+            leftType: block.leftType,
+            leftContent: translatedLeftContent,
+            rightType: block.rightType,
+            rightContent: translatedRightContent,
+          };
+        })
+      );
+
+      // Upload translated content
+      const uploadResponse = await fetch(
+        `/api/locations/${locationId}/content`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: translatedTitle,
+            content: translatedBlocks,
+            language_id: parseInt(languageId),
+          }),
+        }
+      );
+
+      const uploadResult = await uploadResponse.json();
+
+      if (!uploadResult.success) {
+        console.error("Failed to upload translated content:", uploadResult.error);
+        setTranslating(false);
+        return;
+      }
+
+      // Refetch page data to show translated content
+      await fetchPageData();
+    } catch (err) {
+      console.error("Error in translateAndUploadContent:", err);
+    } finally {
+      setTranslating(false);
+    }
+  }, [locationId, languageId, fetchPageData]);
+
+  // Check if content is empty (no title and no content blocks)
+  const hasContent =
+    pageData?.title.trim() !== "" || (pageData?.content.length ?? 0) > 0;
+
+  // Auto-translate if content is empty (only once per language/location)
+  useEffect(() => {
+    if (pageData && !hasContent && !translating && !loading && !translationAttempted) {
+      setTranslationAttempted(true);
+      translateAndUploadContent();
+    }
+  }, [hasContent, translating, loading, translateAndUploadContent, pageData, translationAttempted]);
+
+  if (loading || translating) {
     return (
       <>
         <BackButton />
         <div className="info-page">
           <p style={{ textAlign: "center", color: "var(--dark-green)" }}>
-            Loading...
+            {translating ? "Translating content..." : "Loading..."}
           </p>
         </div>
       </>
@@ -90,10 +382,6 @@ export default function InfoPage({
       </>
     );
   }
-
-  // Check if content is empty (no title and no content blocks)
-  const hasContent =
-    pageData.title.trim() !== "" || pageData.content.length > 0;
 
   if (!hasContent) {
     return (
