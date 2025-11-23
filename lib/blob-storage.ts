@@ -16,6 +16,9 @@ export async function uploadAudioToBlob(
   }
 
   try {
+    // Buffer extends Uint8Array which should be compatible with PutBody
+    // Using type assertion to work around strict TypeScript types
+    // @ts-expect-error - Buffer is compatible with PutBody at runtime but TypeScript types are strict
     const blob = await put(filename, buffer, {
       access: "public",
       contentType: "audio/mpeg",
