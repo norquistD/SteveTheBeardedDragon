@@ -72,7 +72,7 @@ export default function LayoutContent({
     <>
       <div className="header">
         <SearchButton />
-        <h1>Steve's Stories</h1>
+        <h1>Steve&apos;s Stories</h1>
         <LanguageButton
           languageId={languageId}
           setLanguageId={handleLanguageChange}

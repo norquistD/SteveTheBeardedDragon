@@ -44,8 +44,9 @@ export default function InfoPage() {
     <div className="info-page">
       <h1>{initialData.title}</h1>
       <div className="info-body">
-        {initialData.content.map((block) => (
+        {initialData.content.map((block, index) => (
           <BlockCard
+            key={index}
             leftType={block.leftType}
             leftContent={block.leftContent}
             rightType={block.rightType}
