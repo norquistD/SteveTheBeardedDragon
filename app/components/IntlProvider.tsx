@@ -8,8 +8,17 @@ const LocaleContext = createContext<{
   locale: string;
   languageId: number | null;
   languageNativeName: string;
-  setLocale: (locale: string, languageId: number, languageNativeName: string) => void;
-}>({ locale: "en", languageId: null, languageNativeName: "English", setLocale: () => {} });
+  setLocale: (
+    locale: string,
+    languageId: number,
+    languageNativeName: string
+  ) => void;
+}>({
+  locale: "en",
+  languageId: null,
+  languageNativeName: "English",
+  setLocale: () => {},
+});
 
 export function useLocale() {
   return useContext(LocaleContext);
@@ -85,7 +94,11 @@ export default function IntlProvider({
     }
   };
 
-  const setLocale = (newLocale: string, newLanguageId: number, newLanguageNativeName: string) => {
+  const setLocale = (
+    newLocale: string,
+    newLanguageId: number,
+    newLanguageNativeName: string
+  ) => {
     setLocaleState(newLocale);
     setLanguageId(newLanguageId);
     setLanguageNativeName(newLanguageNativeName);
@@ -112,7 +125,9 @@ export default function IntlProvider({
   }
 
   return (
-    <LocaleContext.Provider value={{ locale, languageId, languageNativeName, setLocale }}>
+    <LocaleContext.Provider
+      value={{ locale, languageId, languageNativeName, setLocale }}
+    >
       <NextIntlClientProvider locale={locale} messages={messages}>
         {children}
       </NextIntlClientProvider>

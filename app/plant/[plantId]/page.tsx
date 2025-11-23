@@ -161,6 +161,12 @@ export default function PlantPage({
 
   // Function to translate and upload content
   const translateAndUploadContent = useCallback(async () => {
+    if (!languageId) {
+      console.error("Language ID is not available");
+      setTranslating(false);
+      return;
+    }
+
     setTranslating(true);
 
     try {
@@ -173,7 +179,7 @@ export default function PlantPage({
       }
 
       // Skip translation if current language is English (English content should already exist)
-      if (parseInt(languageId) === englishLanguageId) {
+      if (languageId && parseInt(languageId) === englishLanguageId) {
         console.log("Current language is English, skipping translation");
         setTranslating(false);
         return;
@@ -376,6 +382,12 @@ export default function PlantPage({
 
   // Function to fetch web search results and upload as plant blocks
   const fetchAndUploadWebSearchContent = useCallback(async () => {
+    if (!languageId) {
+      console.error("Language ID is not available");
+      setWebSearching(false);
+      return;
+    }
+
     setWebSearching(true);
 
     try {
