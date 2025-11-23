@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLocale } from "./IntlProvider";
 import LanguageButton from "./LanguageButton";
+import SearchButton from "./SearchButton";
 
 export default function LayoutContent({
   children,
@@ -70,8 +71,8 @@ export default function LayoutContent({
   return (
     <>
       <div className="header">
-        <img className="logo" src="/main_web_logo.webp" alt="Milwaukee Domes" />
-        <h1>Milwaukee Domes</h1>
+        <SearchButton />
+        <h1>Steve's Stories</h1>
         <LanguageButton
           languageId={languageId}
           setLanguageId={handleLanguageChange}
