@@ -114,7 +114,7 @@ export default function SearchPage() {
 
         {!loading && !error && hasSearched && results.length === 0 && (
           <div className="search-no-results">
-            <p>No plants found matching "{searchQuery}"</p>
+            <p>No plants found matching &quot;{searchQuery}&quot;</p>
           </div>
         )}
 
