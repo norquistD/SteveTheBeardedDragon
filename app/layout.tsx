@@ -11,6 +11,9 @@ const poppins = Poppins({
   display: "swap",
 });
 
+// Get base URL from environment variable or default to empty string (relative URLs)
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+
 export const metadata: Metadata = {
   title: "Steve Stories",
   description: "Explore the domes yourself!",
@@ -22,21 +25,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Steve Stories",
     description: "Explore the domes yourself!",
+    url: baseUrl,
+    siteName: "Steve Stories",
     images: [
       {
-        url: "/favicon.png",
+        url: `${baseUrl}/favicon.png`,
         width: 1200,
         height: 630,
         alt: "Steve Stories",
       },
     ],
     type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "Steve Stories",
     description: "Explore the domes yourself!",
-    images: ["/favicon.png"],
+    images: [`${baseUrl}/favicon.png`],
   },
 };
 
