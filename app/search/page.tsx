@@ -44,24 +44,14 @@ export default function SearchPage() {
     }
   };
 
-  // Load all plants on first mount, then debounce search when searchQuery changes
+  // Load all plants on first mount only
   useEffect(() => {
     if (isInitialMount.current) {
-      // Initial load - no debounce
+      // Initial load - show all plants
       handleSearch("");
       isInitialMount.current = false;
-      return;
     }
-
-    // Subsequent searches - debounce
-    const handler = setTimeout(() => {
-      handleSearch(searchQuery);
-    }, 300); // Debounce time
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchQuery]); // Re-run effect when searchQuery changes
+  }, []); // Only run on mount
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
