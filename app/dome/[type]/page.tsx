@@ -32,6 +32,7 @@ export default function DomePage({ params }: { params: { type: string } }) {
   const tourId = searchParams.get("route_id");
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showLabels, setShowLabels] = useState<boolean>(true);
 
   const mapSrc = MAPS[params.type] || MAPS["desert"];
 
@@ -63,7 +64,9 @@ export default function DomePage({ params }: { params: { type: string } }) {
 
   return (
     <>
-      <BackButton />
+      <div className="button-controls">
+        <BackButton />
+      </div>
       <h2 className="dome-page-title">{title}</h2>
       <div className="mapContainer">
         <TransformWrapper
@@ -97,14 +100,25 @@ export default function DomePage({ params }: { params: { type: string } }) {
                   }
                 >
                   <div className="markerDot">
-                    <p className="markerLabel">{location.location_label}</p>
+                    {showLabels && (
+                      <p className="markerLabel">{location.location_label}</p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </TransformComponent>
         </TransformWrapper>
+        {!loading && (
+          <button
+            onClick={() => setShowLabels(!showLabels)}
+            className="toggle-labels-button"
+          >
+            {showLabels ? t("hideLabels") : t("showLabels")}
+          </button>
+        )}
       </div>
+
       <p className="dome-page-description">{description}</p>
     </>
   );
