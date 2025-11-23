@@ -12,8 +12,13 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Milwaukee Domes",
-  description: "Rub my Belly HELLO",
+  title: "Steve Stories",
+  description: "Explore the domes yourself!",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
