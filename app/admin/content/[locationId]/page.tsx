@@ -344,7 +344,7 @@ export default function ContentEditorPage({
 
           {blocks.length === 0 && (
             <p className="no-blocks">
-              No content blocks yet. Click "Add Block" to create one.
+              No content blocks yet. Click &quot;Add Block&quot; to create one.
             </p>
           )}
           <div className="header-buttons">
