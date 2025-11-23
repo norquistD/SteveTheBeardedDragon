@@ -6,11 +6,13 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "../../components/IntlProvider";
 import { type Block, BlockCard } from "../BlockCard";
 import Spinner from "../../components/Spinner";
+import AudioPlayer from "../../components/AudioPlayer";
 import "../InfoPage.css";
 
 export interface InfoPageData {
   title: string;
   content: Block[];
+  audioUrl?: string | null;
 }
 
 export default function InfoPage({
@@ -30,6 +32,9 @@ export default function InfoPage({
   const [error, setError] = useState<string | null>(null);
   const [translating, setTranslating] = useState<boolean>(false);
   const [translationAttempted, setTranslationAttempted] = useState<boolean>(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [generatingTTS, setGeneratingTTS] = useState<boolean>(false);
+  const [ttsAttempted, setTtsAttempted] = useState<boolean>(false);
 
   // Update URL when context language changes
   useEffect(() => {
@@ -51,9 +56,13 @@ export default function InfoPage({
       const result = await response.json();
 
       if (result.success) {
+        const audioUrlFromApi = result.data.audioUrl || null;
         setPageData(result.data);
+        setAudioUrl(audioUrlFromApi);
         // Reset translation attempted flag when language or location changes
         setTranslationAttempted(false);
+        // Reset TTS attempted flag when language or location changes
+        setTtsAttempted(false);
       } else {
         setError(result.error || "Failed to load content");
       }
@@ -357,7 +366,70 @@ export default function InfoPage({
     }
   }, [hasContent, translating, loading, translateAndUploadContent, pageData, translationAttempted]);
 
-  if (loading || translating) {
+  // Function to generate TTS audio
+  const generateTTSAudio = useCallback(async () => {
+    if (!languageId) {
+      console.error("Language ID is not available");
+      setGeneratingTTS(false);
+      return;
+    }
+
+    setGeneratingTTS(true);
+
+    try {
+      const response = await fetch(`/api/locations/${locationId}/tts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language_id: parseInt(languageId),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data.audioUrl) {
+        setAudioUrl(result.data.audioUrl);
+        // Refetch page data to get updated audio URL
+        await fetchPageData();
+      } else {
+        console.error("Failed to generate TTS audio:", result.error);
+      }
+    } catch (err) {
+      console.error("Error generating TTS audio:", err);
+    } finally {
+      setGeneratingTTS(false);
+    }
+  }, [locationId, languageId, fetchPageData]);
+
+  // Auto-generate TTS audio when content exists but audio doesn't
+  // Only generate after translation is complete
+  useEffect(() => {
+    if (
+      pageData &&
+      hasContent &&
+      !translating &&
+      !loading &&
+      !generatingTTS &&
+      !audioUrl &&
+      !ttsAttempted
+    ) {
+      setTtsAttempted(true);
+      generateTTSAudio();
+    }
+  }, [
+    pageData,
+    hasContent,
+    translating,
+    loading,
+    generatingTTS,
+    audioUrl,
+    ttsAttempted,
+    generateTTSAudio,
+  ]);
+
+  if (loading || translating || generatingTTS) {
     return (
       <>
         <div className="info-page">
@@ -403,7 +475,7 @@ export default function InfoPage({
 
   return (
     <>
-      <div className="info-page">
+      <div className="info-page" style={{ paddingBottom: audioUrl ? "80px" : "0" }}>
         <h1>{pageData.title}</h1>
         <div className="info-body">
           {pageData.content.map((block, index) => (
@@ -417,6 +489,7 @@ export default function InfoPage({
           ))}
         </div>
       </div>
+      {audioUrl && <AudioPlayer audioUrl={audioUrl} />}
     </>
   );
 }

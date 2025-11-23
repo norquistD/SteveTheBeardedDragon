@@ -77,9 +77,9 @@ export async function GET(
     const titleRow = rows.find((row) => row.position === null);
     const title = titleRow?.left_content || "";
 
-    // Build content array from rows where position IS NOT NULL
+    // Build content array from rows where position IS NOT NULL and position is not 99 (audio is at position 99)
     const content: Block[] = rows
-      .filter((row) => row.position !== null)
+      .filter((row) => row.position !== null && row.position !== 99)
       .map((row) => ({
         leftType: row.left_is_url ? ("url" as const) : ("paragraph" as const),
         leftContent: row.left_content || "",
@@ -87,15 +87,20 @@ export async function GET(
         rightContent: row.right_content || "",
       }));
 
-    const result: InfoPageData = {
+    // Check for audio at position 99
+    const audioRow = rows.find((row) => row.position === 99);
+    const audioUrl = audioRow?.left_content && audioRow.left_is_url ? audioRow.left_content : null;
+
+    const result: InfoPageData & { audioUrl?: string | null } = {
       title,
       content,
+      audioUrl,
     };
 
     return NextResponse.json({
       success: true,
       data: result,
-    } as ApiResponse<InfoPageData>);
+    } as ApiResponse<InfoPageData & { audioUrl?: string | null }>);
   } catch (error) {
     console.error("Error fetching location content:", error);
     return NextResponse.json(

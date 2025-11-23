@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale } from "./IntlProvider";
 import LanguageButton from "./LanguageButton";
 import SearchButton from "./SearchButton";
@@ -11,6 +12,7 @@ export default function LayoutContent({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [languageId, setLanguageId] = useState<number | null>(null);
   const { setLocale } = useLocale();
 
@@ -78,7 +80,12 @@ export default function LayoutContent({
         </div>
         <div className="header-title-container">
           <img src="/steve.png" alt="Steve" className="header-icon" />
-          <h1>Steve&apos;s Stories</h1>
+          <h1 
+            onClick={() => router.push("/")}
+            style={{ cursor: "pointer" }}
+          >
+            Steve&apos;s Stories
+          </h1>
         </div>
         <LanguageButton
           languageId={languageId}
