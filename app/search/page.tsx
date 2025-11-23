@@ -120,9 +120,6 @@ export default function SearchPage() {
 
         {!loading && !error && results.length > 0 && (
           <div className="search-results">
-            <h2 className="search-results-title">
-              Found {results.length} {results.length === 1 ? "plant" : "plants"}
-            </h2>
             <ul className="search-results-list">
               {results.map((plant) => (
                 <li

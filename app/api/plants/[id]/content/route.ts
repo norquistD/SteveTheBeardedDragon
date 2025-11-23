@@ -163,55 +163,60 @@ export async function POST(
       );
     }
 
-    // Delete all existing plant blocks and their associated content for this plant and language
-    // First, get all blocks for this plant
-    const existingBlocks = await sql`
-      SELECT block_id, content_id_left, content_id_right 
-      FROM plant_blocks 
-      WHERE plant_id = ${plantId}
+    // Delete existing plant blocks and their associated content for this plant and language only
+    // Find content blocks (position IS NOT NULL) that reference content in the target language
+    const blocksToDelete = await sql`
+      SELECT DISTINCT pb.block_id, pb.content_id_left, pb.content_id_right
+      FROM plant_blocks pb
+      INNER JOIN contents c1 ON pb.content_id_left = c1.content_id AND c1.language_id = ${languageId}
+      INNER JOIN contents c2 ON pb.content_id_right = c2.content_id AND c2.language_id = ${languageId}
+      WHERE pb.plant_id = ${plantId} AND pb.position IS NOT NULL
     `;
 
-    // Collect content IDs that need to be deleted (only for this language)
+    // Also find title block (position IS NULL) for this language
+    const titleBlocksToDelete = await sql`
+      SELECT DISTINCT pb.block_id, pb.content_id_left, pb.content_id_right
+      FROM plant_blocks pb
+      INNER JOIN contents c1 ON pb.content_id_left = c1.content_id AND c1.language_id = ${languageId}
+      WHERE pb.plant_id = ${plantId} AND pb.position IS NULL
+    `;
+
+    // Collect all block IDs and content IDs to delete
+    const blockIdsToDelete: number[] = [];
     const contentIdsToDelete: number[] = [];
-    for (const block of existingBlocks) {
-      if (block.content_id_left) {
-        // Check if this content is for the target language
-        const leftContent = await sql`
-          SELECT content_id FROM contents 
-          WHERE content_id = ${block.content_id_left} 
-          AND language_id = ${languageId}
-        `;
-        if (leftContent.length > 0) {
-          contentIdsToDelete.push(block.content_id_left);
-        }
-      }
-      if (block.content_id_right) {
-        // Check if this content is for the target language
-        const rightContent = await sql`
-          SELECT content_id FROM contents 
-          WHERE content_id = ${block.content_id_right} 
-          AND language_id = ${languageId}
-        `;
-        if (rightContent.length > 0) {
-          contentIdsToDelete.push(block.content_id_right);
-        }
+
+    // Add regular blocks
+    for (const block of blocksToDelete) {
+      blockIdsToDelete.push(block.block_id);
+      if (block.content_id_left) contentIdsToDelete.push(block.content_id_left);
+      if (block.content_id_right) contentIdsToDelete.push(block.content_id_right);
+    }
+
+    // Add title blocks
+    for (const block of titleBlocksToDelete) {
+      if (!blockIdsToDelete.includes(block.block_id)) {
+        blockIdsToDelete.push(block.block_id);
+        if (block.content_id_left) contentIdsToDelete.push(block.content_id_left);
+        if (block.content_id_right) contentIdsToDelete.push(block.content_id_right);
       }
     }
 
-    // Delete all plant blocks for this plant first (to remove foreign key constraints)
-    await sql`
-      DELETE FROM plant_blocks WHERE plant_id = ${plantId}
-    `;
+    // Delete only the blocks for this language (not all blocks for the plant)
+    if (blockIdsToDelete.length > 0) {
+      await sql`
+        DELETE FROM plant_blocks 
+        WHERE block_id = ANY(${blockIdsToDelete})
+      `;
+    }
 
-    // Then delete the contents for this language
+    // Delete the contents for this language
     if (contentIdsToDelete.length > 0) {
-      for (const contentId of contentIdsToDelete) {
-        await sql`
-          DELETE FROM contents 
-          WHERE content_id = ${contentId} 
-          AND language_id = ${languageId}
-        `;
-      }
+      // Use a single query to delete all contents at once
+      await sql`
+        DELETE FROM contents 
+        WHERE content_id = ANY(${contentIdsToDelete}) 
+        AND language_id = ${languageId}
+      `;
     }
 
     // Create title content (left)

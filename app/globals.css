@@ -22,7 +22,7 @@
 }
 
 .content-wrapper {
-    margin-top: 70px;
+    margin-top: 50px;
     flex: 1;
     overflow-y: auto;
 }
@@ -30,16 +30,29 @@
 .header-left-buttons {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     padding: 0;
     margin: 0;
 }
 
-.header h1 {
+.header-title-container {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.header h1 {
     text-align: center;
-    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-size: clamp(1.25rem, 5vw, 2rem);
     margin: 0;
+    margin-left: -0.25rem;
+}
+
+.header-icon {
+    height: 3.5rem;
+    width: auto;
+    object-fit: contain;
 }
 
 .logo {

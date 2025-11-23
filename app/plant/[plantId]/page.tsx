@@ -30,8 +30,6 @@ export default function PlantPage({
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingPlantInfo, setFetchingPlantInfo] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [translating, setTranslating] = useState<boolean>(false);
-  const [translationAttempted, setTranslationAttempted] = useState<boolean>(false);
   const [webSearching, setWebSearching] = useState<boolean>(false);
   const [webSearchAttempted, setWebSearchAttempted] = useState<boolean>(false);
 
@@ -74,14 +72,17 @@ export default function PlantPage({
       const result = await response.json();
 
       if (result.success) {
-        // Use plant name as title if title from blocks is empty
-        const title = result.data.title || plantName || "";
+        // Store the raw API data (without fallback) so hasContent check works correctly
+        // Apply plant name fallback only for display purposes
+        const apiTitle = result.data.title || "";
+        const displayTitle = apiTitle || plantName || "";
         setPageData({
           ...result.data,
-          title,
+          title: displayTitle,
+          // Store original API title to check if content actually exists
+          _apiTitle: apiTitle,
         });
-        // Reset translation and web search attempted flags when language or plant changes
-        setTranslationAttempted(false);
+        // Reset web search attempted flag when language or plant changes
         setWebSearchAttempted(false);
       } else {
         setError(result.error || "Failed to load content");
@@ -159,226 +160,6 @@ export default function PlantPage({
     }
   };
 
-  // Function to translate and upload content
-  const translateAndUploadContent = useCallback(async () => {
-    if (!languageId) {
-      console.error("Language ID is not available");
-      setTranslating(false);
-      return;
-    }
-
-    setTranslating(true);
-
-    try {
-      // Find English language
-      const englishLanguageId = await findEnglishLanguage();
-      if (!englishLanguageId) {
-        console.error("English language not found");
-        setTranslating(false);
-        return;
-      }
-
-      // Skip translation if current language is English (English content should already exist)
-      if (languageId && parseInt(languageId) === englishLanguageId) {
-        console.log("Current language is English, skipping translation");
-        setTranslating(false);
-        return;
-      }
-
-      // Get current language info
-      const currentLangInfo = await getCurrentLanguageInfo();
-      if (!currentLangInfo) {
-        console.error("Failed to get current language info");
-        setTranslating(false);
-        return;
-      }
-
-      // Fetch English content
-      const englishContentResponse = await fetch(
-        `/api/plants/${plantId}/content?language_id=${englishLanguageId}`
-      );
-      const englishContentResult = await englishContentResponse.json();
-
-      if (!englishContentResult.success) {
-        console.error("Failed to fetch English content");
-        setTranslating(false);
-        return;
-      }
-
-      const englishContent: PlantPageData = englishContentResult.data;
-
-      // Check if English content exists and has content
-      const hasEnglishContent =
-        englishContent.title.trim() !== "" || englishContent.content.length > 0;
-
-      if (!hasEnglishContent) {
-        console.error("English content is empty");
-        setTranslating(false);
-        return;
-      }
-
-      // Translate title if it exists
-      let translatedTitle = englishContent.title;
-      if (englishContent.title.trim() !== "") {
-        let translationSuccess = false;
-        for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
-          try {
-            const translateResponse = await fetch("/api/translate", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                text: englishContent.title,
-                source_language: "English",
-                target_language: currentLangInfo.name,
-              }),
-            });
-
-            const translateResult = await translateResponse.json();
-            if (translateResult.success) {
-              const translation = translateResult.data.translation;
-              // Moderate the translated title
-              const isSafe = await moderateText(translation);
-              if (isSafe) {
-                translatedTitle = translation;
-                translationSuccess = true;
-              } else {
-                console.warn(`Translated title failed moderation (attempt ${attempt}/3)`);
-              }
-            }
-          } catch (err) {
-            console.error(`Failed to translate title (attempt ${attempt}/3):`, err);
-          }
-        }
-        if (!translationSuccess) {
-          console.warn("All translation attempts failed moderation, using English title");
-        }
-      }
-
-      // Translate content blocks
-      const translatedBlocks: Block[] = await Promise.all(
-        englishContent.content.map(async (block) => {
-          let translatedLeftContent = block.leftContent;
-          let translatedRightContent = block.rightContent;
-
-          // Translate left content if it's a paragraph
-          if (block.leftType === "paragraph" && block.leftContent.trim() !== "") {
-            let translationSuccess = false;
-            for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
-              try {
-                const translateResponse = await fetch("/api/translate", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    text: block.leftContent,
-                    source_language: "English",
-                    target_language: currentLangInfo.name,
-                  }),
-                });
-
-                const translateResult = await translateResponse.json();
-                if (translateResult.success) {
-                  const translation = translateResult.data.translation;
-                  // Moderate the translated content
-                  const isSafe = await moderateText(translation);
-                  if (isSafe) {
-                    translatedLeftContent = translation;
-                    translationSuccess = true;
-                  } else {
-                    console.warn(`Translated left content failed moderation (attempt ${attempt}/3)`);
-                  }
-                }
-              } catch (err) {
-                console.error(`Failed to translate left content (attempt ${attempt}/3):`, err);
-              }
-            }
-            if (!translationSuccess) {
-              console.warn("All translation attempts failed moderation, using English for left content");
-            }
-          }
-
-          // Translate right content if it's a paragraph
-          if (block.rightType === "paragraph" && block.rightContent.trim() !== "") {
-            let translationSuccess = false;
-            for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
-              try {
-                const translateResponse = await fetch("/api/translate", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    text: block.rightContent,
-                    source_language: "English",
-                    target_language: currentLangInfo.name,
-                  }),
-                });
-
-                const translateResult = await translateResponse.json();
-                if (translateResult.success) {
-                  const translation = translateResult.data.translation;
-                  // Moderate the translated content
-                  const isSafe = await moderateText(translation);
-                  if (isSafe) {
-                    translatedRightContent = translation;
-                    translationSuccess = true;
-                  } else {
-                    console.warn(`Translated right content failed moderation (attempt ${attempt}/3)`);
-                  }
-                }
-              } catch (err) {
-                console.error(`Failed to translate right content (attempt ${attempt}/3):`, err);
-              }
-            }
-            if (!translationSuccess) {
-              console.warn("All translation attempts failed moderation, using English for right content");
-            }
-          }
-
-          return {
-            leftType: block.leftType,
-            leftContent: translatedLeftContent,
-            rightType: block.rightType,
-            rightContent: translatedRightContent,
-          };
-        })
-      );
-
-      // Upload translated content
-      const uploadResponse = await fetch(
-        `/api/plants/${plantId}/content`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title: translatedTitle,
-            content: translatedBlocks,
-            language_id: parseInt(languageId),
-          }),
-        }
-      );
-
-      const uploadResult = await uploadResponse.json();
-
-      if (!uploadResult.success) {
-        console.error("Failed to upload translated content:", uploadResult.error);
-        setTranslating(false);
-        return;
-      }
-
-      // Refetch page data to show translated content
-      await fetchPageData();
-    } catch (err) {
-      console.error("Error in translateAndUploadContent:", err);
-    } finally {
-      setTranslating(false);
-    }
-  }, [plantId, languageId, fetchPageData]);
 
   // Function to fetch web search results and upload as plant blocks
   const fetchAndUploadWebSearchContent = useCallback(async () => {
@@ -391,45 +172,265 @@ export default function PlantPage({
     setWebSearching(true);
 
     try {
-      // Fetch web search results
-      const webSearchResponse = await fetch(
-        `/api/plants/${plantId}/websearch`
-      );
-      const webSearchResult = await webSearchResponse.json();
-
-      if (!webSearchResult.success || !webSearchResult.data.botanical_info) {
-        console.error("Failed to fetch web search results");
+      // Find English language
+      const englishLanguageId = await findEnglishLanguage();
+      if (!englishLanguageId) {
+        console.error("English language not found");
         setWebSearching(false);
         return;
       }
 
-      const botanicalInfo = webSearchResult.data.botanical_info;
-      const plantNameForTitle = plantName || webSearchResult.data.plant_name || "";
+      // Check if current language is English
+      const isEnglish = parseInt(languageId) === englishLanguageId;
 
-      // Convert web search results into Block format
-      const blocks: Block[] = [];
+      // First, check if English content already exists in the database
+      const englishContentResponse = await fetch(
+        `/api/plants/${plantId}/content?language_id=${englishLanguageId}`
+      );
+      const englishContentResult = await englishContentResponse.json();
 
-      // Block 1: Origin (left) and Habitat (right)
-      if (botanicalInfo.origin || botanicalInfo.habitat) {
-        blocks.push({
-          leftType: "paragraph",
-          leftContent: botanicalInfo.origin || "",
-          rightType: "paragraph",
-          rightContent: botanicalInfo.habitat || "",
-        });
+      let englishContent: PlantPageData | null = null;
+      let englishBlocks: Block[] = [];
+      let englishPlantName = plantName || "";
+
+      let hasEnglishContent = false;
+      if (englishContentResult.success && englishContentResult.data) {
+        englishContent = englishContentResult.data;
+        if (englishContent) {
+          hasEnglishContent =
+            englishContent.title.trim() !== "" || englishContent.content.length > 0;
+
+          if (hasEnglishContent) {
+            // Use existing English content from database
+            console.log("Using existing English content from database");
+            englishBlocks = englishContent.content;
+            englishPlantName = englishContent.title || plantName || "";
+          }
+        }
       }
 
-      // Block 2: Characteristics (left) and Interesting Facts (right)
-      if (botanicalInfo.characteristics || botanicalInfo.interesting_facts) {
-        blocks.push({
-          leftType: "paragraph",
-          leftContent: botanicalInfo.characteristics || "",
-          rightType: "paragraph",
-          rightContent: botanicalInfo.interesting_facts || "",
-        });
+      // Only do web search if English content doesn't exist
+      if (!hasEnglishContent) {
+        console.log("English content not found, fetching from web search");
+        // Fetch web search results (returns English content)
+        const webSearchResponse = await fetch(
+          `/api/plants/${plantId}/websearch`
+        );
+        const webSearchResult = await webSearchResponse.json();
+
+        if (!webSearchResult.success || !webSearchResult.data.botanical_info) {
+          console.error("Failed to fetch web search results");
+          setWebSearching(false);
+          return;
+        }
+
+        const botanicalInfo = webSearchResult.data.botanical_info;
+        englishPlantName = plantName || webSearchResult.data.plant_name || "";
+
+        // Convert web search results into Block format (English content)
+        // Block 1: Origin (left) and Habitat (right)
+        if (botanicalInfo.origin || botanicalInfo.habitat) {
+          englishBlocks.push({
+            leftType: "paragraph",
+            leftContent: botanicalInfo.origin || "",
+            rightType: "paragraph",
+            rightContent: botanicalInfo.habitat || "",
+          });
+        }
+
+        // Block 2: Characteristics (left) and Interesting Facts (right)
+        if (botanicalInfo.characteristics || botanicalInfo.interesting_facts) {
+          englishBlocks.push({
+            leftType: "paragraph",
+            leftContent: botanicalInfo.characteristics || "",
+            rightType: "paragraph",
+            rightContent: botanicalInfo.interesting_facts || "",
+          });
+        }
+
+        // Upload English content to database first (so it can be reused for future translations)
+        const englishUploadResponse = await fetch(
+          `/api/plants/${plantId}/content`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title: englishPlantName,
+              content: englishBlocks,
+              language_id: englishLanguageId,
+            }),
+          }
+        );
+
+        const englishUploadResult = await englishUploadResponse.json();
+        if (!englishUploadResult.success) {
+          console.error("Failed to upload English content:", englishUploadResult.error);
+          // Continue anyway - we can still translate and upload to target language
+        } else {
+          console.log("English content saved to database");
+          // Update hasEnglishContent and englishContent so we can use it if current language is English
+          hasEnglishContent = true;
+          englishContent = {
+            title: englishPlantName,
+            content: englishBlocks,
+          };
+        }
       }
 
-      // Upload blocks to database
+      // Prepare final title and blocks
+      let finalTitle = englishPlantName;
+      let finalBlocks = englishBlocks;
+
+      // If current language is English and we have English content, use it directly
+      if (isEnglish && hasEnglishContent && englishContent) {
+        // English content exists and we're on English - use it directly
+        // No need to translate or web search
+        console.log("Using existing English content for English language");
+        finalTitle = englishContent.title || plantName || "";
+        finalBlocks = englishContent.content;
+      } else if (!isEnglish) {
+        // Need to translate to target language
+        // Get current language info
+        const currentLangInfo = await getCurrentLanguageInfo();
+        if (!currentLangInfo) {
+          console.error("Failed to get current language info");
+          setWebSearching(false);
+          return;
+        }
+
+        // Translate title if it exists
+        if (englishPlantName.trim() !== "") {
+          let translationSuccess = false;
+          for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
+            try {
+              const translateResponse = await fetch("/api/translate", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  text: englishPlantName,
+                  source_language: "English",
+                  target_language: currentLangInfo.name,
+                }),
+              });
+
+              const translateResult = await translateResponse.json();
+              if (translateResult.success) {
+                const translation = translateResult.data.translation;
+                // Moderate the translated title
+                const isSafe = await moderateText(translation);
+                if (isSafe) {
+                  finalTitle = translation;
+                  translationSuccess = true;
+                } else {
+                  console.warn(`Translated title failed moderation (attempt ${attempt}/3)`);
+                }
+              }
+            } catch (err) {
+              console.error(`Failed to translate title (attempt ${attempt}/3):`, err);
+            }
+          }
+          if (!translationSuccess) {
+            console.warn("All translation attempts failed moderation, using English title");
+          }
+        }
+
+        // Translate content blocks
+        finalBlocks = await Promise.all(
+          englishBlocks.map(async (block) => {
+            let translatedLeftContent = block.leftContent;
+            let translatedRightContent = block.rightContent;
+
+            // Translate left content if it's a paragraph
+            if (block.leftType === "paragraph" && block.leftContent.trim() !== "") {
+              let translationSuccess = false;
+              for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
+                try {
+                  const translateResponse = await fetch("/api/translate", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      text: block.leftContent,
+                      source_language: "English",
+                      target_language: currentLangInfo.name,
+                    }),
+                  });
+
+                  const translateResult = await translateResponse.json();
+                  if (translateResult.success) {
+                    const translation = translateResult.data.translation;
+                    // Moderate the translated content
+                    const isSafe = await moderateText(translation);
+                    if (isSafe) {
+                      translatedLeftContent = translation;
+                      translationSuccess = true;
+                    } else {
+                      console.warn(`Translated left content failed moderation (attempt ${attempt}/3)`);
+                    }
+                  }
+                } catch (err) {
+                  console.error(`Failed to translate left content (attempt ${attempt}/3):`, err);
+                }
+              }
+              if (!translationSuccess) {
+                console.warn("All translation attempts failed moderation, using English for left content");
+              }
+            }
+
+            // Translate right content if it's a paragraph
+            if (block.rightType === "paragraph" && block.rightContent.trim() !== "") {
+              let translationSuccess = false;
+              for (let attempt = 1; attempt <= 3 && !translationSuccess; attempt++) {
+                try {
+                  const translateResponse = await fetch("/api/translate", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      text: block.rightContent,
+                      source_language: "English",
+                      target_language: currentLangInfo.name,
+                    }),
+                  });
+
+                  const translateResult = await translateResponse.json();
+                  if (translateResult.success) {
+                    const translation = translateResult.data.translation;
+                    // Moderate the translated content
+                    const isSafe = await moderateText(translation);
+                    if (isSafe) {
+                      translatedRightContent = translation;
+                      translationSuccess = true;
+                    } else {
+                      console.warn(`Translated right content failed moderation (attempt ${attempt}/3)`);
+                    }
+                  }
+                } catch (err) {
+                  console.error(`Failed to translate right content (attempt ${attempt}/3):`, err);
+                }
+              }
+              if (!translationSuccess) {
+                console.warn("All translation attempts failed moderation, using English for right content");
+              }
+            }
+
+            return {
+              leftType: block.leftType,
+              leftContent: translatedLeftContent,
+              rightType: block.rightType,
+              rightContent: translatedRightContent,
+            };
+          })
+        );
+      }
+
+      // Upload blocks to database (translated or English)
       const uploadResponse = await fetch(
         `/api/plants/${plantId}/content`,
         {
@@ -438,8 +439,8 @@ export default function PlantPage({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            title: plantNameForTitle,
-            content: blocks,
+            title: finalTitle,
+            content: finalBlocks,
             language_id: parseInt(languageId),
           }),
         }
@@ -463,17 +464,20 @@ export default function PlantPage({
   }, [plantId, languageId, plantName, fetchPageData]);
 
   // Check if content is empty (no title and no content blocks)
-  const hasContent =
-    pageData?.title.trim() !== "" || (pageData?.content.length ?? 0) > 0;
+  // Use _apiTitle (raw API data) to avoid false positives from plant name fallback
+  const apiTitle = (pageData as any)?._apiTitle;
+  const hasApiTitle = apiTitle !== undefined && apiTitle.trim() !== "";
+  const hasContentBlocks = (pageData?.content.length ?? 0) > 0;
+  // If _apiTitle exists, use it; otherwise fall back to display title for backwards compatibility
+  const hasContent = hasApiTitle || (apiTitle === undefined && pageData?.title.trim() !== "") || hasContentBlocks;
 
   // Auto-fill with web search if content is empty (only once per language/plant)
-  // Try web search first, then fall back to translation if web search fails
+  // Web search fetches English content and automatically translates to target language
   useEffect(() => {
     if (
       pageData &&
       !hasContent &&
       !webSearching &&
-      !translating &&
       !loading &&
       !webSearchAttempted
     ) {
@@ -483,39 +487,13 @@ export default function PlantPage({
   }, [
     hasContent,
     webSearching,
-    translating,
     loading,
     fetchAndUploadWebSearchContent,
     pageData,
     webSearchAttempted,
   ]);
 
-  // Auto-translate if content is still empty after web search (only once per language/plant)
-  useEffect(() => {
-    if (
-      pageData &&
-      !hasContent &&
-      !translating &&
-      !webSearching &&
-      !loading &&
-      webSearchAttempted &&
-      !translationAttempted
-    ) {
-      setTranslationAttempted(true);
-      translateAndUploadContent();
-    }
-  }, [
-    hasContent,
-    translating,
-    webSearching,
-    loading,
-    translateAndUploadContent,
-    pageData,
-    translationAttempted,
-    webSearchAttempted,
-  ]);
-
-  if (loading || translating || webSearching || fetchingPlantInfo) {
+  if (loading || webSearching || fetchingPlantInfo) {
     return (
       <>
         <div className="info-page">

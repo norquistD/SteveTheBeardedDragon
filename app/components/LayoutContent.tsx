@@ -76,7 +76,10 @@ export default function LayoutContent({
           <BackButton />
           <SearchButton />
         </div>
-        <h1>Steve&apos;s Stories</h1>
+        <div className="header-title-container">
+          <img src="/steve.png" alt="Steve" className="header-icon" />
+          <h1>Steve&apos;s Stories</h1>
+        </div>
         <LanguageButton
           languageId={languageId}
           setLanguageId={handleLanguageChange}
