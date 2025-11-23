@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { ApiResponse, ApiError } from "@/lib/types";
-import fs from "fs";
-import path from "path";
+import { uploadAudioToBlob } from "@/lib/blob-storage";
 
 interface Block {
   leftType: "paragraph" | "url";
@@ -169,19 +168,11 @@ export async function POST(
     // Convert the response stream to a buffer
     const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
 
-    // Ensure /public/audio directory exists
-    const audioDir = path.join(process.cwd(), "public", "audio");
-    if (!fs.existsSync(audioDir)) {
-      fs.mkdirSync(audioDir, { recursive: true });
-    }
-
     // Generate filename: location-{locationId}-{languageCode}.mp3
     const filename = `location-${locationId}-${languageCode}.mp3`;
-    const filePath = path.join(audioDir, filename);
-    const audioUrl = `/audio/${filename}`;
 
-    // Write audio file to disk
-    fs.writeFileSync(filePath, audioBuffer);
+    // Upload audio to Vercel Blob Storage
+    const audioUrl = await uploadAudioToBlob(audioBuffer, filename);
 
     // Delete existing audio block at position 99 for this location and language if it exists
     const existingAudioBlock = await sql`
