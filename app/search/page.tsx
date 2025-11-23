@@ -23,7 +23,7 @@ export default function SearchPage() {
     setHasSearched(true);
 
     try {
-      const url = query.trim() 
+      const url = query.trim()
         ? `/api/search?q=${encodeURIComponent(query.trim())}`
         : `/api/search?q=`;
       const response = await fetch(url);
@@ -88,6 +88,9 @@ export default function SearchPage() {
               disabled={loading}
             />
           </div>
+          <button type="submit" className="search-button" disabled={loading}>
+            {t("searchButton")}
+          </button>
         </form>
 
         {loading && (
@@ -120,7 +123,7 @@ export default function SearchPage() {
                   <div className="plant-scientific-name">
                     {plant.plant_scientific_name}
                   </div>
-                  { plant.plant_scientific_name !== plant.plant_name && (
+                  {plant.plant_scientific_name !== plant.plant_name && (
                     <div className="plant-name">{plant.plant_name}</div>
                   )}
                 </li>

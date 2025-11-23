@@ -33,6 +33,7 @@
   },
   "search": {
     "title": "Search for plants:",
-    "placeholder": "Enter plant name..."
+    "placeholder": "Enter plant name...",
+    "searchButton": "Search"
   }
 }

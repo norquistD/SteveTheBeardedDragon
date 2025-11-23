@@ -33,6 +33,7 @@
   },
   "search": {
     "title": "Szukaj roślin:",
-    "placeholder": "Wprowadź nazwę rośliny..."
+    "placeholder": "Wprowadź nazwę rośliny...",
+    "searchButton": "Szukaj"
   }
 }

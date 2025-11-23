@@ -99,7 +99,8 @@ export default function LandingPage() {
           flexWrap: "wrap",
         }}
       >
-        <button
+        <p>Coming Soon!</p>
+        {/* <button
           style={{
             margin: "16px 0",
             padding: "8px 20px",
@@ -113,7 +114,7 @@ export default function LandingPage() {
           onClick={() => router.push("/admin")}
         >
           {t("landing.adminDashboard")}
-        </button>
+        </button> */}
       </div>
     </>
   );

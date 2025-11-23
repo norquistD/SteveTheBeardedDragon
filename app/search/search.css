@@ -12,11 +12,14 @@
 
 .search-form {
   width: 100%;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .search-input-wrapper {
   position: relative;
-  width: 100%;
+  flex: 1;
 }
 
 .search-icon {
@@ -37,6 +40,33 @@
   color: var(--dark-green);
   outline: none;
   transition: border-color 0.2s;
+}
+
+.search-button {
+  padding: 12px 24px;
+  background-color: var(--light-green);
+  border: 2px solid var(--light-green);
+  border-radius: 8px;
+  color: var(--cream);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.search-button:hover {
+  background-color: var(--dark-green);
+  border-color: var(--dark-green);
+}
+
+.search-button:active {
+  transform: scale(0.98);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .search-input:focus {

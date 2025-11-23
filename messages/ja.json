@@ -33,6 +33,7 @@
   },
   "search": {
     "title": "植物を検索：",
-    "placeholder": "植物名を入力..."
+    "placeholder": "植物名を入力...",
+    "searchButton": "検索"
   }
 }

@@ -33,6 +33,7 @@
   },
   "search": {
     "title": "搜索植物：",
-    "placeholder": "输入植物名称..."
+    "placeholder": "输入植物名称...",
+    "searchButton": "搜索"
   }
 }

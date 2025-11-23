@@ -33,6 +33,7 @@
   },
   "search": {
     "title": "Buscar plantas:",
-    "placeholder": "Ingrese el nombre de la planta..."
+    "placeholder": "Ingrese el nombre de la planta...",
+    "searchButton": "Buscar"
   }
 }
